@@ -12,15 +12,15 @@ To install geodecision, run this command in your terminal:
 
 .. code-block:: console
 
-    $ pip install geodecision
+    $ uv pip install geodecision
 
 This is the preferred method to install geodecision, as it will always install the most recent stable release.
 
-If you don't have `pip`_ installed, this `Python installation guide`_ can guide
+If you don't have `uv`_ installed, this `uv installation guide`_ can guide
 you through the process.
 
-.. _pip: https://pip.pypa.io
-.. _Python installation guide: http://docs.python-guide.org/en/latest/starting/installation/
+.. _uv: https://docs.astral.sh/uv/
+.. _uv installation guide: https://docs.astral.sh/uv/getting-started/installation/
 
 
 From sources
@@ -44,7 +44,7 @@ Once you have a copy of the source, you can install it with:
 
 .. code-block:: console
 
-    $ python setup.py install
+    $ uv sync
 
 
 .. _Github repo: https://github.com/thomleysens/geodecision

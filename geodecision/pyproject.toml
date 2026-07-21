@@ -1,0 +1,62 @@
+[build-system]
+requires = ["setuptools>=64", "wheel"]
+build-backend = "setuptools.build_meta"
+
+[project]
+name = "geodecision"
+description = "Short description"
+license = { text = "Proprietary" }
+authors = [{ name = "thomas", email = "thomleysens@gmail.com" }]
+dynamic = ["version", "readme"]
+requires-python = ">=3.11"
+keywords = ["geodecision"]
+classifiers = [
+    "Development Status :: 2 - Pre-Alpha",
+    "Intended Audience :: Developers",
+    "Natural Language :: English",
+    "Programming Language :: Python :: 3.11",
+    "Programming Language :: Python :: 3.12",
+    "Programming Language :: Python :: 3.13",
+]
+dependencies = [
+    "bokeh>=1.4",
+    "fiona",
+    "geopandas>=0.6.0",
+    "geojson>=2.4.1",
+    "geopy>=1.20.0",
+    "jsonschema>=3.2.0",
+    "mapclassify>=2.1.1",
+    "matplotlib",
+    "networkx>=2.3",
+    "numpy>=1.17.3",
+    "osmnx>=2.0.0",
+    "pandas>=1.0.0",
+    "pyproj>=2.4.2.post1",
+    "rtree>=0.9.3",
+    "shapely>=1.6.4",
+]
+
+[project.urls]
+Homepage = "https://github.com/VCityTeam/UD-geodecision"
+
+[project.scripts]
+geodecision = "geodecision.cli:main"
+
+[dependency-groups]
+dev = [
+    "bump2version",
+    "coverage",
+    "flake8",
+    "pytest",
+    "pytest-cov",
+    "pytest-env",
+    "pytest-runner",
+    "Sphinx",
+    "tox",
+    "twine",
+    "watchdog",
+    "wheel",
+]
+
+[tool.setuptools.packages.find]
+include = ["geodecision", "geodecision.*"]

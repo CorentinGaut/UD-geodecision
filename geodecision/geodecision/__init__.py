@@ -4,9 +4,8 @@ __author__ = """Thomas Leysens"""
 __email__ = 'thomleysens@gmail.com'
 __version__ = '0.1.0'
 
-from ._version import get_versions
-__version__ = get_versions()['version']
-del get_versions
+from . import _version
+__version__ = _version.get_versions()['version']
 
 from .accessibility.accessibility import run
 from .accessibility.isochrone import Accessibility

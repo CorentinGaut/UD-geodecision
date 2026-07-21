@@ -12,27 +12,22 @@ to the nearest park"), rendered as a map.
 
 ## Install
 
-From the `geodecision/` directory (the one containing `setup.py`):
+From the `geodecision/` directory (the one containing `pyproject.toml`):
 
 ```bash
-pip install -e .
+uv sync
 ```
 
-This registers the `geodecision` command (see `setup.py`'s
-`console_scripts` entry point). If you'd rather not install the package,
-every subcommand below also works as `python -m geodecision.cli <command> <config.json>`.
+This creates a `.venv` with `geodecision` and its dependencies (including
+the `geodecision` console-script entry point from `pyproject.toml`'s
+`[project.scripts]`). Run subcommands via `uv run geodecision <command> <config.json>`,
+or activate the environment (`source .venv/bin/activate`) and use `geodecision <command> <config.json>`
+directly. If you'd rather not install the package, every subcommand below
+also works as `uv run python -m geodecision.cli <command> <config.json>`.
 
-The versions pinned in `../env.yml` (Python 3.7, osmnx 0.10, ...) are from
-2020 and are no longer installable as-is; a conda environment with current,
-mutually-compatible versions works instead:
-
-```bash
-conda create -n geodecision-demo -c conda-forge \
-    python=3.11 osmnx networkx geopandas shapely pyproj pandas \
-    matplotlib bokeh jsonschema rtree geojson geopy fiona
-conda activate geodecision-demo
-pip install -e .
-```
+`pyproject.toml` targets current, mutually-compatible dependency versions
+(Python 3.11+, osmnx >=2.0, ...) — the once-pinned `env.yml` (Python 3.7,
+osmnx 0.10, ...) from 2020 has been retired.
 
 Requires internet access (`download-graph` and `fetch-polygons` query the
 Overpass API / OpenStreetMap; fetching buildings for the whole bbox can
