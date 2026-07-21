@@ -52,15 +52,18 @@ def get_intersect_matches(base, possible_intersected):
         Parameters:
         -----------
         
-        - base(Shapely Polygon)
+        - base(Shapely Polygon or MultiPolygon)
         - possible_intersected(GeoDataFrame)
         """
         #TODO: Check if intersection on "to" is necessary
         matches = []
         possible_intersected = possible_intersected.set_geometry("from")
         sindex = possible_intersected.sindex
-        
-        for poly in base:
+
+        # Shapely >=2.0 removed direct iteration on multi-part geometries;
+        # use .geoms when available, else treat base as a single geometry.
+        polys = base.geoms if hasattr(base, "geoms") else [base]
+        for poly in polys:
             possible_matches_index = list(sindex.intersection(poly.bounds))
             possible_matches = possible_intersected.iloc[possible_matches_index]
             precise_matches = possible_matches[

@@ -338,20 +338,13 @@ class Accessibility:
         gdf_lines = gdf_lines.rename(
                         columns={'line': 'geometry'}
                         ).set_geometry('geometry')
-        gdf_lines.crs = {
-                'init': "epsg:{}".format(
-                        self.epsgs.origin
-                        )
-                }
-        gdf_lines.to_crs(
-                {
-                        'init': "epsg:{}".format(
-                                self.epsgs.metric
-                                )
-                        }, 
-                inplace=True
-                )
-                
+        # "from"/"to"/"line" geometries were built directly from self.G's
+        # node x/y attributes, which are already in the metric CRS (G comes
+        # out of ConnectPoints/GetSplitNodes, which both require metric
+        # input) - so label them as such directly, no reprojection needed.
+        gdf_lines.crs = "EPSG:{}".format(self.epsgs.metric)
+
+
         # Reset index
         gdf_lines.reset_index(drop=True, inplace=True)
         # Attribute a specific category value to lines inside input polygons
@@ -359,8 +352,10 @@ class Accessibility:
                 self.input_polygons, 
                 gdf_lines
                 )
-        gdf_lines.iso_cat_merged.iloc[neutral_lines] = 0.0
-        gdf_lines.color.iloc[neutral_lines] = self.colors[0]
+        # Use .loc with combined row/col indexing rather than chained
+        # assignment, which is a silent no-op under pandas Copy-on-Write.
+        gdf_lines.loc[neutral_lines, self.iso_cat_merged] = 0.0
+        gdf_lines.loc[neutral_lines, "color"] = self.colors[0]
         
         gdf_lines.drop(
                 ['from','to'], 

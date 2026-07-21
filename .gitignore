@@ -109,5 +109,9 @@ ENV/
 /dashboard/data
 /docker/FormatAndAnalyseRoofs/data
 
+# osmnx cache and example script outputs
+/geodecision/cache/
+/geodecision/examples/output/
+
 # Log
 *activity.log

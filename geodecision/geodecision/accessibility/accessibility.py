@@ -255,11 +255,15 @@ def run(json_params):
        
     start = time.time()
     #Get points and lines GeoDataFrames from Graph
+    # graph_to_gdf_points's signature is (G, lon, lat, epsg, ...) - pass by
+    # keyword to avoid the positional lat/lon mixup that used to be here
+    # (params["lat"]/params["lon"] were passed in lon/lat argument order,
+    # silently building Point(lat, lon) instead of Point(lon, lat)).
     gdf_pts, gdf_lines = graph_to_gdf_points(
             G,
-            params["lat"],
-            params["lon"],
-            params["epsg_graph"],
+            lon=params["lon"],
+            lat=params["lat"],
+            epsg=params["epsg_graph"],
             get_lines=True
             )
     #To metric

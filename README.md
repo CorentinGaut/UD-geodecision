@@ -142,6 +142,23 @@ import geodecision
 from geodecision import [specific]
 ```
 
+#### Try the example
+A full worked example — walking accessibility to real OpenStreetMap park polygons, end to end — lives in [`geodecision/examples/`](geodecision/examples/README.md). It runs entirely through the package's own CLI, so no example-only code is needed:
+
+```bash
+cd geodecision
+pip install -e .
+geodecision download-graph        examples/config/graph.json
+geodecision fetch-polygons        examples/config/parks.json
+geodecision fetch-polygons        examples/config/buildings.json
+geodecision compute-accessibility examples/config/accessibility.json
+geodecision visualize             examples/config/visualize.json
+```
+
+This downloads a walkable street network and real park polygons for a bounding box in Lyon, computes isochrones (walking time to the nearest park), and renders a map to `geodecision/examples/output/isochrones_map.png`. Every parameter — bounding box, projection, trip times, ... — is set in the JSON config files under `examples/config/`, so re-running for a different area is a matter of editing JSON, not code.
+
+See [`geodecision/examples/README.md`](geodecision/examples/README.md) for the full walkthrough, what each output file contains, and which library versions are known to work today (the ones pinned in `env.yml` are from 2020 and no longer installable as-is).
+
 ### Architecture
 #### Python geodecision module and sub-modules
 ```

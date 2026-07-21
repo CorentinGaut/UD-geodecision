@@ -268,7 +268,12 @@ def graph_to_gdf_points(G, lon, lat, epsg, get_lines=False):
     df["tuple"] = list(zip(df[lon], df[lat]))
     df["geometry"] = df["tuple"].map(lambda x: Point(x))
     del df["tuple"]
-                   
+
+    # Node ids only live in the index at this point (NetworkX node keys);
+    # downstream code (e.g. graph.connectpoints.ConnectPoints) expects an
+    # explicit "osmid" column, so expose it here too.
+    df["osmid"] = df.index
+
     gdf = gpd.GeoDataFrame(df)
     gdf.set_geometry("geometry")
     gdf.crs = {"init":"epsg:{}".format(epsg)}

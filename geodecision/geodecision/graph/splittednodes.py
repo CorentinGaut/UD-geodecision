@@ -208,7 +208,9 @@ class GetSplitNodes:
         if poly.geom_type == "Polygon":
             boundary = poly.boundary
         elif poly.geom_type == "MultiPolygon":
-            boundary = poly[0].boundary
+            # Shapely >=2.0 removed direct indexing on multi-part
+            # geometries; use the largest part's boundary via .geoms.
+            boundary = max(poly.geoms, key=lambda p: p.area).boundary
         return boundary
         
 

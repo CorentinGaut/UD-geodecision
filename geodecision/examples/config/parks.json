@@ -1,0 +1,9 @@
+{
+    "bbox": [45.752, 4.822, 45.770, 4.845],
+    "osm_key": "leisure",
+    "osm_value": "park",
+    "epsg_origin": 4326,
+    "output_folder": "examples/output",
+    "polygons_geojsonfile": "parks.geojson",
+    "id_column": "poly_id"
+}

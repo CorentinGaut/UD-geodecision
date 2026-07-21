@@ -14,7 +14,10 @@ from .classification.classification import ClassificationDataFrames
 from .graph.connectpoints import ConnectPoints
 from .graph.splittednodes import GetSplitNodes
 from .graph.utils import graph_to_df, df_to_graph
+from .graph.download import run as download_graph
 from .osmquery.methods import get_OSM_poly
+from .osmquery.methods import run as fetch_polygons
 from .spatialops.operations import SpatialOperations, gdf_to_geosource
 from .spatialops.intersections import GetIntersections
 from .citygml.analyseroofs import GetRoofsAndSlopes
+from .visualization.plot_isochrones import run as plot_isochrones

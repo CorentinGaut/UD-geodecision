@@ -131,9 +131,9 @@ class ConnectPoints:
         #Build Rtree
         self.Rtree = rtree.index.Index()
         [self.Rtree.insert(
-                fid, 
+                fid,
                 geom.bounds
-                ) for fid, geom in self.edges['geometry'].iteritems()];
+                ) for fid, geom in self.edges['geometry'].items()];
         
     
     def update_nodes_process(self):
@@ -228,9 +228,12 @@ class ConnectPoints:
         """
         #Update existing edges 
         ## Split edges to segments
+        # Grouping by a list (even length-1) now yields tuple keys under
+        # recent pandas; group by the column name directly for scalar keys
+        # that match self.edges' index labels.
         self.line_pps_dict = {
                 k: MultiPoint(list(v)) for k, v in
-                     self.points.groupby(['kne_idx'])['pp']
+                     self.points.groupby('kne_idx')['pp']
                      }
         new_lines = [
                 self.split_line(
@@ -328,7 +331,15 @@ class ConnectPoints:
         line = snap(line, pps, 1e-8)  # slow?
 
         try:
-            new_lines = list(split(line, pps))  # split into segments
+            # Shapely >=2.0 returns a GeometryCollection from split(), which
+            # (like other multi-part geometries) no longer supports direct
+            # iteration - list(...) raises TypeError here on every call,
+            # which used to be silently swallowed below and turned into an
+            # empty split (i.e. the original edge got dropped and never
+            # replaced, disconnecting the network at every split point).
+            # Use .geoms explicitly instead.
+            result = split(line, pps)
+            new_lines = list(result.geoms) if hasattr(result, "geoms") else [result]
             return new_lines
         except TypeError as e:
             logger.info('Error when splitting line: {}\n{}\n{}\n'.format(e, line, pps))

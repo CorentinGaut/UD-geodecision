@@ -1,0 +1,9 @@
+{
+    "bbox": [45.752, 4.822, 45.770, 4.845],
+    "osm_key": "building",
+    "osm_value": "all",
+    "epsg_origin": 4326,
+    "output_folder": "examples/output",
+    "polygons_geojsonfile": "buildings.geojson",
+    "id_column": "poly_id"
+}

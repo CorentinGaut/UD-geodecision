@@ -20,20 +20,26 @@ setup(
     packages=find_packages(include=["geodecision", "geodecision.*"]),
     install_requires=[
 			"bokeh>=1.4",
-			"fiona"
+			"fiona",
 			"geopandas>=0.6.0",
 			"geojson>=2.4.1",
 			"geopy>=1.20.0",
 			"jsonschema>=3.2.0",
 			"mapclassify>=2.1.1",
+			"matplotlib",
 			"networkx>=2.3",
 			"numpy>=1.17.3",
-			"osmnx>=0.10",
+			"osmnx>=2.0.0",
 			"pandas>=1.0.0",
 			"pyproj>=2.4.2.post1",
 			"rtree>=0.9.3",
 			"shapely>=1.6.4"
 		     ],
+    entry_points={
+        "console_scripts": [
+            "geodecision=geodecision.cli:main",
+        ],
+    },
     keywords="geodecision",
     python_requires=">=3.6",
     classifiers=[

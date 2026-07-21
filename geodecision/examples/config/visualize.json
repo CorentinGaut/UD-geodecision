@@ -1,0 +1,10 @@
+{
+    "isolines_geojsonfile": "examples/output/isolines_parks.geojson",
+    "parks_geojsonfile": "examples/output/parks.geojson",
+    "buildings_geojsonfile": "examples/output/buildings.geojson",
+    "epsg_metric": 2154,
+    "output_folder": "examples/output",
+    "output_png": "isochrones_map.png",
+    "title": "Walking distance to the nearest park (Lyon Presqu'ile)",
+    "linewidth": 2.5
+}
