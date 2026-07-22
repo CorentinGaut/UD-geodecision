@@ -114,7 +114,7 @@ def run(json_params):
     ax.legend(handles=legend_elements, loc="lower left", frameon=True, title="Walking time")
 
     output_path = os.path.join(output_folder, params["output_png"])
-    fig.savefig(output_path, dpi=150, bbox_inches="tight")
+    fig.savefig(output_path, dpi=600, bbox_inches="tight")
     plt.close(fig)
 
     logger.info(

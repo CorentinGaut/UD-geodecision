@@ -15,7 +15,7 @@
     "threshold": 60,
     "dist_split": 30,
     "knn": 5,
-    "distance": 5000,
+    "distance": 8000,
     "weight": "time",
     "access_type": "park",
     "prefix": "parks_demo",

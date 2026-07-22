@@ -10,7 +10,6 @@ import networkx as nx
 from shapely.geometry import Point, LineString
 from shapely import speedups
 from collections import namedtuple
-from bokeh.palettes import Viridis, Viridis256
 import time
 import pandas as pd
 
@@ -21,6 +20,36 @@ speedups.enable()
 
 GeoData = namedtuple("GeoData", ["origin","metric","vis"])
 EPSG = namedtuple("EPSG", ["origin", "metric", "vis"])
+
+_COLOR_ON_SITE = "#000000"
+_COLOR_GRADIENT = ["#2ecc71", "#f1c40f", "#e74c3c"]  # green -> yellow -> red
+
+
+def _hex_to_rgb(hex_color):
+    hex_color = hex_color.lstrip("#")
+    return tuple(int(hex_color[i:i + 2], 16) for i in (0, 2, 4))
+
+
+def _rgb_to_hex(rgb):
+    return "#{:02x}{:02x}{:02x}".format(*(round(c) for c in rgb))
+
+
+def _interpolate_gradient(colors, t):
+    """Piecewise-linear interpolation across >=2 hex stops, t in [0, 1]."""
+    if t <= 0:
+        return colors[0]
+    if t >= 1:
+        return colors[-1]
+    n_segments = len(colors) - 1
+    segment = min(int(t * n_segments), n_segments - 1)
+    local_t = t * n_segments - segment
+    start_rgb = _hex_to_rgb(colors[segment])
+    end_rgb = _hex_to_rgb(colors[segment + 1])
+    return _rgb_to_hex(
+            start + (end - start) * local_t
+            for start, end in zip(start_rgb, end_rgb)
+            )
+
 
 class Accessibility:
     """
@@ -66,10 +95,13 @@ class Accessibility:
         - list of nodes from which to measure accessibility
     - input_polygons(Shapely Polygons):
         - Input polygons from which center_nodes have been deducted
-    - palette(dict):
-        - dict of colors:
-            => {1:"#hexcolor1", 2:"hexcolor2"}
-        - default: Viridis Bokeh palette
+    - Colors:
+        - trip_time 0 (on-site / input polygons) is always colored
+          black ("#000000")
+        - the remaining trip_times, in the order given, are colored
+          by evenly interpolating a fixed 3-stop hex gradient from
+          green (shortest trip_time) through yellow (midpoint) to
+          red (longest trip_time)
     - epsg(dict):
         - dict of EPSG values (origin, metric, visualisation)
         - => metric EPSG is needed to measure buffers in meters, origin EPSG 
@@ -93,7 +125,6 @@ class Accessibility:
         weight,
         center_nodes,
         input_polygons,
-        palette=Viridis,
         epsgs={
                 "origin":"4326",
                 "metric":"2154",
@@ -120,34 +151,23 @@ class Accessibility:
         
         self.center_nodes = center_nodes
         
-        #Handle case when only one value in trip_times 
-        # to avoid error getting palette (min. 3) 
-        colors_times = [0]
-        colors_times.extend(trip_times)
-        if len(colors_times) > 11:
-            palette = Viridis256
-            self.colors = {
-            trip_time:color for trip_time,color in zip(
-                        colors_times, 
-                        palette[colors_times[0]:colors_times[-1]+1]
-                        )
-                }
-        elif (len(colors_times) <=11) and  (len(colors_times) > 2):
-            self.colors = {
-                trip_time:color for trip_time,color in zip(
-                        colors_times, 
-                        palette[len(colors_times)]
-                        )
-                }
-        elif len(colors_times) == 2:
-            self.colors = {
-                    colors_times[0]:palette[3][0],
-                    colors_times[1]:palette[3][1]
-                    }
+        # Trip_time 0 is always the "on-site" category (input polygons):
+        # force it to black. Non-zero trip_times get a green (shortest) ->
+        # yellow (midpoint) -> red (longest) gradient, evenly interpolated
+        # across the fixed _COLOR_GRADIENT hex stops.
+        n = len(trip_times)
+        if n == 0:
+            ramp = []
+        elif n == 1:
+            ramp = [_COLOR_GRADIENT[0]]
         else:
-            self.colors = {
-                    colors_times[0]:palette[3][0]
-                    }
+            ramp = [
+                    _interpolate_gradient(_COLOR_GRADIENT, i / (n - 1))
+                    for i in range(n)
+                    ]
+
+        self.colors = {0: _COLOR_ON_SITE}
+        self.colors.update(zip(trip_times, ramp))
             
         self.G = G
         self.trip_times = trip_times

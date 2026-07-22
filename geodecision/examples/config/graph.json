@@ -1,9 +1,9 @@
 {
-    "bbox": [45.752, 4.822, 45.770, 4.845],
+    "bbox": [45.736860, 4.805317, 45.769798, 4.909687],
     "network_type": "walk",
     "epsg_origin": 4326,
     "walk_speed_kmh": 5,
     "output_folder": "examples/output",
     "edges_filename": "edges.json",
     "nodes_filename": "nodes.json"
-}
+} 
