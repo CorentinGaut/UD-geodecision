@@ -1,18 +1,17 @@
 > ***GeoDecision => Decision-making tools for urban management***
 
 ## Presentation
-> ***Note** => This package is mainly use - for now - through [dockers](https://github.com/VCityTeam/UD-geodecision-docker)*
 
 Geodecision is a set of tools to help urban decision-making:
-* Accessibility/network operations and measures (*graph approach*).
-* CityGML parsing to get roofs and measures:
+* (*Updated*) Accessibility/network operations and measures.
+* (*Deprecated*) CityGML parsing to get roofs and measures: 
   * slopes
   * area
   * compactness
   * ...
-* OSM queries
-* Classification (*automatic best classification from data - for example INSEE gridded data*)
-* Spatial operations:
+* (*Deprecated*) OSM queries
+* (*Deprecated*) Classification (*automatic best classification from data - for example INSEE gridded data*)
+* (*Deprecated*) Spatial operations:
   * intersections between GeoDataFrame
 
 Geodecision inputs and outputs are geospatial data:
@@ -23,7 +22,7 @@ Geodecision inputs and outputs are geospatial data:
 ### Warnings/Disclaimer
 Our package requires libraries with **spatial functionality** such as [GeoPandas](https://geopandas.org). Those depend on open source C libraries ([GEOS](https://geos.osgeo.org/), [GDAL](https://www.gdal.org/), [PROJ](https://proj.org/)), but the underlying Python packages (`shapely`, `fiona`, `pyproj`, `rtree`) now ship prebuilt wheels bundling these libraries on PyPI, so no separate compiler or system install is required.
 
-We use [uv](https://docs.astral.sh/uv/) - *an extremely fast Python package and project manager* - to install and work with our package.
+We use [uv](https://docs.astral.sh/uv/) - *a fast Python package and project manager* - to install and work with our package.
 
 ### How to
 #### Install geodecision
@@ -35,12 +34,6 @@ We use [uv](https://docs.astral.sh/uv/) - *an extremely fast Python package and 
     uv sync
     ```
 
-#### Use it
-Once installed, you can use it as other packages:
-```python
-import geodecision
-from geodecision import [specific]
-```
 
 #### Try the example
 A full worked example — walking accessibility to real OpenStreetMap park polygons, end to end — lives in [`geodecision/examples/`](geodecision/examples/README.md). It runs entirely through the package's own CLI, so no example-only code is needed:
@@ -56,9 +49,15 @@ geodecision compute-accessibility examples/config/accessibility.json
 geodecision visualize             examples/config/visualize.json
 ```
 
-This downloads a walkable street network and real park polygons for a bounding box in Lyon, computes isochrones (walking time to the nearest park), and renders a map to `geodecision/examples/output/isochrones_map.png`. Every parameter — bounding box, projection, trip times, ... — is set in the JSON config files under `examples/config/`, so re-running for a different area is a matter of editing JSON, not code.
+This downloads a walkable street network and real park polygons for a bounding box in Lyon, computes isochrones (walking time to the nearest park), and renders a map to `geodecision/examples/output/isochrones_map.png`. Every parameter (bounding box, projection, trip times, ...) is set in the JSON config files under `examples/config/`, so re-running for a different area is a matter of editing JSON.
 
 See [`geodecision/examples/README.md`](geodecision/examples/README.md) for the full walkthrough and what each output file contains. Dependency versions are pinned in [`geodecision/pyproject.toml`](geodecision/pyproject.toml) and kept current (Python 3.11+).
+#### Use it
+Once installed, you can use it as other packages:
+```python
+import geodecision
+from geodecision import [specific]
+```
 
 ### Architecture
 #### Python geodecision module and sub-modules
