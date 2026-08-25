@@ -7,7 +7,6 @@ Subpackages
 .. toctree::
 
    geodecision.accessibility
-   geodecision.classification
    geodecision.graph
    geodecision.logger
    geodecision.osmquery

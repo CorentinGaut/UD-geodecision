@@ -46,12 +46,19 @@ geodecision download-graph        examples/config/graph.json
 geodecision fetch-polygons        examples/config/parks.json
 geodecision fetch-polygons        examples/config/buildings.json
 geodecision compute-accessibility examples/config/accessibility.json
-geodecision visualize             examples/config/visualize.json
+geodecision visualize             examples/config/visualize.json # optional: generate a png file to visualize the result
 ```
+> `fetch-polygons`, `compute-accessibility` and `visualize` can be long depending on the bounding box size
 
-This downloads a walkable street network and real park polygons for a bounding box in Lyon, computes isochrones (walking time to the nearest park), and renders a map to `geodecision/examples/output/isochrones_map.png`. Every parameter (bounding box, projection, trip times, ...) is set in the JSON config files under `examples/config/`, so re-running for a different area is a matter of editing JSON.
+This downloads a walkable street network and real park polygons for a bounding box in Lyon, computes isochrones (walking time to the nearest park), and renders a map to `geodecision/examples/output/isochrones_map.png`.
+Every parameter (bounding box, projection, trip times, ...) is set in the JSON config files under `examples/config/`, so re-running for a different area is a matter of editing JSON.
 
 See [`geodecision/examples/README.md`](geodecision/examples/README.md) for the full walkthrough and what each output file contains. Dependency versions are pinned in [`geodecision/pyproject.toml`](geodecision/pyproject.toml) and kept current (Python 3.11+).
+#### Visualize it
+Once the geojson is generated, you can visualized it through a png file with the command line `geodecision visualize             examples/config/visualize.json`. 
+
+A second option is to integrate the geojson result file into a visualization library like [iTowns](https://www.itowns-project.org/). An example is available [here](https://vcityteam.github.io/itowns-accessibility/) and the code to create this example is on this [Github](https://github.com/VCityTeam/itowns-accessibility) 
+
 #### Use it
 Once installed, you can use it as other packages:
 ```python

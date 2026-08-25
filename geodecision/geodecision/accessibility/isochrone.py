@@ -16,8 +16,6 @@ import pandas as pd
 from ..spatialops.operations import get_intersect_matches
 from ..logger.logger import _get_duration, logger
 
-speedups.enable()
-
 GeoData = namedtuple("GeoData", ["origin","metric","vis"])
 EPSG = namedtuple("EPSG", ["origin", "metric", "vis"])
 

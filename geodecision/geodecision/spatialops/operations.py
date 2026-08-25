@@ -13,8 +13,6 @@ import json
 
 from ..logger.logger import _get_duration, logger
 
-speedups.enable()
-
 #Get GeoJSON DataSource
 def gdf_to_geosource(gdf):
     """

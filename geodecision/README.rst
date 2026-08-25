@@ -67,10 +67,6 @@ Python geodecision module and sub-modules
    │   ├── categories.py
    │   ├── constants.py
    │   └── __init__.py
-   ├── classification
-   │   ├── classification.py
-   │   ├── constants_vars.py
-   │   └── __init__.py
    ├── cli.py
    ├── geodecision.py
    ├── graph

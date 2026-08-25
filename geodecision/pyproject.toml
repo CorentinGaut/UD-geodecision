@@ -25,7 +25,6 @@ dependencies = [
     "geojson>=2.4.1",
     "geopy>=1.20.0",
     "jsonschema>=3.2.0",
-    "mapclassify>=2.1.1",
     "matplotlib",
     "networkx>=2.3",
     "numpy>=1.17.3",

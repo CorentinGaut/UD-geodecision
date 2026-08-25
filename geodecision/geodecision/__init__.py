@@ -9,7 +9,6 @@ __version__ = _version.get_versions()['version']
 
 from .accessibility.accessibility import run
 from .accessibility.isochrone import Accessibility
-from .classification.classification import ClassificationDataFrames
 from .graph.connectpoints import ConnectPoints
 from .graph.splittednodes import GetSplitNodes
 from .graph.utils import graph_to_df, df_to_graph

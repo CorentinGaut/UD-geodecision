@@ -15,8 +15,6 @@ import os
 import re
 from copy import deepcopy
 
-speedups.enable()
-
 from ..logger.logger import _get_duration, logger
 
     
