@@ -55,9 +55,9 @@ Every parameter (bounding box, projection, trip times, ...) is set in the JSON c
 
 See [`geodecision/examples/README.md`](geodecision/examples/README.md) for the full walkthrough and what each output file contains. Dependency versions are pinned in [`geodecision/pyproject.toml`](geodecision/pyproject.toml) and kept current (Python 3.11+).
 #### Visualize it
-Once the geojson is generated, you can visualized it through a png file with the command line `geodecision visualize             examples/config/visualize.json`. 
-
-A second option is to integrate the geojson result file into a visualization library like [iTowns](https://www.itowns-project.org/). An example is available [here](https://vcityteam.github.io/itowns-accessibility/) and the code to create this example is on this [Github](https://github.com/VCityTeam/itowns-accessibility) 
+Once the GeoJSON result is generated, there are two ways to visualize it:
+1. **Built-in PNG rendering** — run `geodecision visualize examples/config/visualize.json` to render the isolines/isochrones to a PNG map (`isochrones_map.png`). This is the same command as in the pipeline above, and, like `fetch-polygons` and `compute-accessibility`, it can take a while to run depending on the bounding box size.
+2. **3D web visualization** — integrate the GeoJSON result file into a visualization library such as [iTowns](https://www.itowns-project.org/). A live example is available [here](https://vcityteam.github.io/itowns-accessibility/), with its source code on [GitHub](https://github.com/VCityTeam/itowns-accessibility).
 
 #### Use it
 Once installed, you can use it as other packages:

@@ -87,3 +87,10 @@ Written to `examples/output/` (gitignored):
 | `updated_edges.json`, `updated_nodes.json`, `problematic_nodes.json` | `compute-accessibility` | the rest of `accessibility.run()`'s standard output set |
 | `isochrones_map.png` | `visualize` | the rendered map |
 | `run_config.json` | every command | the exact JSON config used for that output folder |
+
+## Visualize the result
+
+Once `isolines_parks.geojson` / `isochrones_parks.geojson` exist, there are two ways to look at them:
+
+1. **Built-in PNG rendering** — step 4 above (`geodecision visualize examples/config/visualize.json`) renders the isolines, colored by accessibility-distance category, to `examples/output/isochrones_map.png`. Like `fetch-polygons` and `compute-accessibility`, this command can take a while depending on the bounding box size.
+2. **3D web visualization** — load the GeoJSON output into a visualization library such as [iTowns](https://www.itowns-project.org/). A live example built from this same kind of accessibility output is available [here](https://vcityteam.github.io/itowns-accessibility/), with its source code on [GitHub](https://github.com/VCityTeam/itowns-accessibility).
