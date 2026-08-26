@@ -18,4 +18,5 @@ from .osmquery.methods import run as fetch_polygons
 from .spatialops.operations import SpatialOperations, gdf_to_geosource
 from .spatialops.intersections import GetIntersections
 from .citygml.analyseroofs import GetRoofsAndSlopes
+from .citygml.citygml import run as process_citygml
 from .visualization.plot_isochrones import run as plot_isochrones

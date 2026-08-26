@@ -1,0 +1,15 @@
+{
+    "gml_dir": "examples/data/city_gml",
+    "epsg_in": 3946,
+    "epsg_out": 3946,
+    "output_folder": "examples/output/citygml",
+    "driver": "GeoJSON",
+    "palette": "viridis",
+    "attributes": ["ADMINISTRA", "CULTE", "DEPLACEMEN", "ENSEIGNEME", "SANTE", "SPORT", "URGENCE"],
+    "selection": {
+        "min_width": 10,
+        "compactness": 0.7,
+        "area": 100,
+        "max_slope": 30
+    }
+}

@@ -421,7 +421,7 @@ class GetRoofsAndSlopes:
                     {} is not a Polygon
                     """.format(poly.wkt)
                     )
-            return gpd.np.nan
+            return np.nan
         
     
     def _get_roofs(self, building, id_building):
@@ -548,7 +548,7 @@ class GetRoofsAndSlopes:
         """
         df_buildings = pd.DataFrame.from_dict(dict_buildings, orient="index")
         #Replace space strings
-        df_buildings.replace(" ", gpd.np.nan, inplace=True) 
+        df_buildings.replace(" ", np.nan, inplace=True)
         #Drop nan
         df_buildings.dropna(how="all", inplace=True)
         
@@ -684,7 +684,7 @@ class GetRoofsAndSlopes:
                 how="right"
                 )
         gdf_roofs = gpd.GeoDataFrame(df_roofs, geometry="geometry")
-        gdf_roofs.crs = {"init":"epsg:{}".format(self.epsg_out)}
+        gdf_roofs.set_crs(epsg=self.epsg_out, allow_override=True, inplace=True)
         
         #Drop duplicates and NaN geometries
         gdf_roofs = gdf_roofs.drop_duplicates(
@@ -710,50 +710,19 @@ class GetRoofsAndSlopes:
         gdf_roofs["min_width"] = gdf_roofs["geometry"].map(self._get_min_width)
         #Back to previous EPSG
         gdf_roofs = gdf_roofs.to_crs(epsg=self.epsg_out)
-#        #Replace space strings
-#        df_buildings.replace(" ", gpd.np.nan, inplace=True) 
-#        #Drop nan
-#        df_buildings.dropna(how="all", inplace=True)
-#        
         df_grounds["geometry"] = df_grounds.apply(self._add_poly, axis=1)
         gdf_grounds = gpd.GeoDataFrame(df_grounds, geometry="geometry")
-        gdf_grounds.crs = {"init":"epsg:{}".format(self.epsg_out)}
+        gdf_grounds.set_crs(epsg=self.epsg_out, allow_override=True, inplace=True)
         gdf_grounds.drop(
-                columns=["xs","ys","zs"], 
+                columns=["xs","ys","zs"],
                 inplace=True
-                ) 
-        
-#        #Drop nan with subset and filter attributes
-#        # ***WARNING: attributes can be problematic => 
-#        # https://github.com/VCityTeam/UD-SV/tree/master/UD-Doc/LessonsLearned/WorkingWithLyonOpenData#undocummented-additional-data-***
-#        if self.attributes != []:
-#            df_attributes = df_buildings[self.attributes]
-#            df_attributes.dropna(
-#                    how="all",
-#                    inplace=True
-#                    )
-#            df_attributes["attribute"] = df_attributes[
-#                    self.attributes
-#                    ].values.tolist()
-#            df_attributes["attribute"] = df_attributes["attribute"].apply(
-#                    lambda x:  gpd.pd.Series(x).dropna().drop_duplicates().values[0]
-#                    )
-#            df_buildings["attribute"] = df_attributes["attribute"]
-#        
-#        #Set public access value to True or False
-#        df_buildings = self._set_if_in(
-#                PUBLIC, 
-#                df_buildings, 
-#                "attribute", 
-#                "public_access"
-#                )
-        
+                )
+
         if self.name != "":
             if (self.driver == "GeoJSON") or (self.driver == "ESRI Shapefile"): 
                 #Check if file exists, delete it if so before writting it 
                 ##(necessary because of Fiona behavior with GeoJSON)
-                name_to_check = self.name + "_roofs" + self.extension
-                name_to_check = os.path.join(self.out_dir, self.name)
+                name_to_check = os.path.join(self.out_dir, self.name + "_roofs" + self.extension)
                 try:
                     os.remove(name_to_check)
                 except OSError:
@@ -801,4 +770,5 @@ class GetRoofsAndSlopes:
         
         self.df_buildings = df_buildings
         self.df_roofs = df_roofs
-        self.gdf_roofs = gdf_roofs 
+        self.gdf_roofs = gdf_roofs
+        self.gdf_grounds = gdf_grounds 

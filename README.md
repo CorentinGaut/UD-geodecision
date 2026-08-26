@@ -4,10 +4,12 @@
 
 Geodecision is a set of tools to help urban decision-making:
 * (*Updated*) Accessibility/network operations and measures.
-* (*Deprecated*) CityGML parsing to get roofs and measures: 
+* (*Updated*) CityGML parsing to get roofs and measures:
   * slopes
   * area
   * compactness
+  * minimum width
+  * estimated number of floors
   * ...
 * (*Deprecated*) OSM queries
 * (*Deprecated*) Classification (*automatic best classification from data - for example INSEE gridded data*)
@@ -35,8 +37,11 @@ We use [uv](https://docs.astral.sh/uv/) - *a fast Python package and project man
     ```
 
 
-#### Try the example
-A full worked example — walking accessibility to real OpenStreetMap park polygons, end to end — lives in [`geodecision/examples/`](geodecision/examples/README.md). It runs entirely through the package's own CLI, so no example-only code is needed:
+#### Try the examples
+Two **independent** example workflows — they use different input data and neither depends on the other — live in [`geodecision/examples/`](geodecision/examples/README.md), both runnable entirely through the package's own CLI, so no example-only code is needed. Dependency versions are pinned in [`geodecision/pyproject.toml`](geodecision/pyproject.toml) and kept current (Python 3.11+).
+
+##### Workflow 1: Accessibility to parks
+Walking accessibility to real OpenStreetMap park polygons, end to end:
 
 ```bash
 cd geodecision
@@ -53,11 +58,20 @@ geodecision visualize             examples/config/visualize.json # optional: gen
 This downloads a walkable street network and real park polygons for a bounding box in Lyon, computes isochrones (walking time to the nearest park), and renders a map to `geodecision/examples/output/isochrones_map.png`.
 Every parameter (bounding box, projection, trip times, ...) is set in the JSON config files under `examples/config/`, so re-running for a different area is a matter of editing JSON.
 
-See [`geodecision/examples/README.md`](geodecision/examples/README.md) for the full walkthrough and what each output file contains. Dependency versions are pinned in [`geodecision/pyproject.toml`](geodecision/pyproject.toml) and kept current (Python 3.11+).
-#### Visualize it
 Once the GeoJSON result is generated, there are two ways to visualize it:
-1. **Built-in PNG rendering** — run `geodecision visualize examples/config/visualize.json` to render the isolines/isochrones to a PNG map (`isochrones_map.png`). This is the same command as in the pipeline above, and, like `fetch-polygons` and `compute-accessibility`, it can take a while to run depending on the bounding box size.
+1. **Built-in PNG rendering** — the `visualize` step above renders the isolines/isochrones to a PNG map (`isochrones_map.png`).
 2. **3D web visualization** — integrate the GeoJSON result file into a visualization library such as [iTowns](https://www.itowns-project.org/). A live example is available [here](https://vcityteam.github.io/itowns-accessibility/), with its source code on [GitHub](https://github.com/VCityTeam/itowns-accessibility).
+
+See [`geodecision/examples/README.md`](geodecision/examples/README.md#workflow-1-accessibility-to-parks) for the full walkthrough and what each output file contains.
+
+##### Workflow 2: CityGML roofs
+If you have CityGML (3D building) data for your area, a single command derives per-building roof slope/area/compactness/floor-count and an optional "roof potential" selection — no relation to the accessibility workflow above, and no OpenStreetMap data involved:
+
+```bash
+geodecision process-citygml examples/config/citygml.json
+```
+
+See [`geodecision/examples/README.md`](geodecision/examples/README.md#workflow-2-citygml-roofs) for where to get CityGML data, the config fields, and what each output file contains.
 
 #### Use it
 Once installed, you can use it as other packages:
@@ -78,7 +92,9 @@ geodecision/
 ├── citygml
 │   ├── analyseroofs.py
 │   ├── categories.py
+│   ├── citygml.py
 │   ├── constants.py
+│   ├── schema.py
 │   └── __init__.py
 ├── classification
 │   ├── classification.py
@@ -161,10 +177,11 @@ Our geodecision package is structured like this (*see below*) and you have to re
     |     │   ├── isochrone.py
     |     │   └── schema.py
     |     ├── citygml
-    |     |      │   └── __init__.py
     |     │   ├── analyseroofs.py
     |     │   ├── categories.py
+    |     │   ├── citygml.py
     |     │   ├── constants.py
+    |     │   ├── schema.py
     |     │   └── __init__.py
     |     ├── classification
     |     │   ├── classification.py
