@@ -193,11 +193,9 @@ def run(json_params):
     #Drop duplicates based on geometry
     gdf_features = gdf_features.drop_duplicates(subset="geometry")
     gdf_features = gdf_features.to_crs(
-            {
-                    "init":"epsg:{}".format(
-                            params["epsg_metric"]
-                            )
-                    }
+            "EPSG:{}".format(
+                    params["epsg_metric"]
+                    )
             )
     
     logger.info(
@@ -268,14 +266,10 @@ def run(json_params):
             )
     #To metric
     gdf_pts_metric = gdf_pts.to_crs(
-            {
-                    "init":"epsg:{}".format(params["epsg_metric"])
-                    }
+            "EPSG:{}".format(params["epsg_metric"])
             )
     gdf_lines_metric = gdf_lines.to_crs(
-            {
-                    "init":"epsg:{}".format(params["epsg_metric"])
-                    }
+            "EPSG:{}".format(params["epsg_metric"])
             )
     
     logger.info(

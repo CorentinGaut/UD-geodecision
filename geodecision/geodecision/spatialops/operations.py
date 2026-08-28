@@ -165,7 +165,7 @@ class SpatialOperations:
                         )
             self.dict_unions[trip_time] = gpd.GeoDataFrame(
                     geometry=[union],
-                    crs = {"init":"epsg:{}".format(self.epsg)}
+                    crs = "EPSG:{}".format(self.epsg)
                     )
             
             logger.info("""

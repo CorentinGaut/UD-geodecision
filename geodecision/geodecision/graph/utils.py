@@ -276,7 +276,7 @@ def graph_to_gdf_points(G, lon, lat, epsg, get_lines=False):
 
     gdf = gpd.GeoDataFrame(df)
     gdf.set_geometry("geometry")
-    gdf.crs = {"init":"epsg:{}".format(epsg)}
+    gdf.crs = "EPSG:{}".format(epsg)
     
     if get_lines == True:
         edges = nx.to_pandas_edgelist(G)
@@ -297,7 +297,7 @@ def graph_to_gdf_points(G, lon, lat, epsg, get_lines=False):
         
         gdf_lines = gpd.GeoDataFrame(edges)
         gdf_lines.set_geometry("geometry")
-        gdf_lines.crs = {"init":"epsg:{}".format(epsg)}
+        gdf_lines.crs = "EPSG:{}".format(epsg)
         del gdf_lines["from"]
         del gdf_lines["to"]
         del gdf_lines["tuple"]

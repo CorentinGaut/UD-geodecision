@@ -53,7 +53,7 @@ geodecision fetch-polygons        examples/config/buildings.json
 geodecision compute-accessibility examples/config/accessibility.json
 geodecision visualize             examples/config/visualize.json # optional: generate a png file to visualize the result
 ```
-> `fetch-polygons`, `compute-accessibility` and `visualize` can be long depending on the bounding box size
+> `fetch-polygons`, `compute-accessibility` and `visualize` can be long depending on the bounding box size — `compute-accessibility` took ~10 minutes on an average laptop for the Lyon example above
 
 This downloads a walkable street network and real park polygons for a bounding box in Lyon, computes isochrones (walking time to the nearest park), and renders a map to `geodecision/examples/output/isochrones_map.png`.
 Every parameter (bounding box, projection, trip times, ...) is set in the JSON config files under `examples/config/`, so re-running for a different area is a matter of editing JSON.
@@ -96,10 +96,6 @@ geodecision/
 │   ├── constants.py
 │   ├── schema.py
 │   └── __init__.py
-├── classification
-│   ├── classification.py
-│   ├── constants_vars.py
-│   └── __init__.py
 ├── cli.py
 ├── geodecision.py
 ├── graph
@@ -138,120 +134,10 @@ Or activate the environment directly:
 ```bash
 source [path/to/geodecision]/.venv/bin/activate
 ```
-
-### Structure correctly your modules and submodules
-#### A good structuration
-Our geodecision package is structured like this (*see below*) and you have to respect this organisation if you want to add your own modules and submodules.
-```
- geodecision:
-    |--- AUTHORS.rst
-    |--- CONTRIBUTING.rst
-    |--- HISTORY.rst
-    |--- Makefile
-    |--- MANIFEST.in
-    |--- README.rst
-    |--- pyproject.toml
-    |--- uv.lock
-    |--- setup.cfg
-    |--- setup.py
-    |--- tox.ini
-    |--- .editorconfig
-    |--- .gitattributes
-    |--- .gitignore
-    |___ docs
-    |    |--- authors.rst
-    |    |--- conf.py
-    |    |--- contributing.rst
-    |    |--- history.rst
-    |    |--- index.rst
-    |    |--- installation.rst
-    |    |--- make.bat
-    |    |--- Makefile
-    |    |--- modules.rst
-    |    |--- readme.rst
-    |    |--- usage.rst
-    |___ geodecision
-    |     ├── accessibility
-    |     │   ├── accessibility.py
-    |     │   ├── __init__.py
-    |     │   ├── isochrone.py
-    |     │   └── schema.py
-    |     ├── citygml
-    |     │   ├── analyseroofs.py
-    |     │   ├── categories.py
-    |     │   ├── citygml.py
-    |     │   ├── constants.py
-    |     │   ├── schema.py
-    |     │   └── __init__.py
-    |     ├── classification
-    |     │   ├── classification.py
-    |     │   ├── constants_vars.py
-    |     │   └── __init__.py
-    |     ├── cli.py
-    |     ├── geodecision.py
-    |     ├── graph
-    |     │   ├── connectpoints.py
-    |     │   ├── __init__.py
-    |     │   ├── splittednodes.py
-    |     │   └── utils.py
-    |     ├── __init__.py
-    |     ├── logger
-    |     │   ├── __init__.py
-    |     │   └── logger.py
-    |     ├── osmquery
-    |     │   ├── __init__.py
-    |     │   └── methods.py
-    |     └── spatialops
-    |         ├── __init__.py
-    |         └── operations.py
-    |___ tests
-    |    |--- __init__.py
-    |    |--- test_mymodule.py
-    |___ .github
-```
-
-If you already have module and sub-modules, put them in:
-```
-mymodule
-    |___ mymodule
-```
-Once done, don't forget to check if the ```import``` are done in the right way. Let's say you have this architecture;
-```
-mymodule
-    |___ mymodule
-         |--- cli.py
-         |--- __init__.py
-         |--- mymodule.py
-         |___ submoduleA
-         |    |--- __init__.py
-         |    |--- submoduleAOne
-         |    |--- submoduleATwo
-         |___ submoduleB
-              |--- __init__.py
-              |--- submoduleBOne
-              |--- submoduleBTwo
-```
-If you want ***class OneA***  from ```submoduleAOne``` and ***class TwoB*** from ```submoduleBTwo``` to be accessible from your module, you need to edit the ```__init__.py```:
-```
-mymodule
-    |___ mymodule
-         |--- __init__.py
-```
-You have to add these lines:
-```python
-from .submoduleA.submoduleAOne import OneA
-from .submoduleB.submoduleBTwo import TwoB
-```
-
-If you want to import ***class OneB*** from ```submoduleBOne``` in ```submoduleATwo``` you need to add this line in ```submoduleATwo```:
-```python
-from ..submoduleB.submoduleBOne import OneB
-```
-
 ### Build after changes
 Run `uv build` from the `geodecision/` directory to produce sdist/wheel artifacts in `dist/` (see [`geodecision/Makefile`](geodecision/Makefile)'s `dist` target).
 
-### Documentation
+<!-- ### Documentation
 > We use [Sphinx](http://www.sphinx-doc.org/) for documentation
 
 #### Generate documentation with Sphinx
@@ -272,5 +158,5 @@ sphinx-apidoc -f -o . ../mymodule/
 It will generate a bunch of ***rst*** files. Then, to get ***html*** pages (*in a ```_build``` directory for example*):
 ```
 cd ..
-sphinx-build -b html docs/ _build/
+sphinx-build -b html docs/ _build/ -->
 ```

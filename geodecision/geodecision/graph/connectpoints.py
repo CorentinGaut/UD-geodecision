@@ -411,13 +411,14 @@ class ConnectPoints:
             new_lines_gdf = gpd.GeoDataFrame(
                 {
                         'kne_idx': np.repeat(
-                                kne_idxs, 
+                                kne_idxs,
                                 lens
                                 ),
                         'geometry': list(
                                 itertools.chain.from_iterable(new_lines)
                                 )
-                        }
+                        },
+                crs=edges.crs
                 )
             # merge to inherit the data of the replaced line
             cols = list(edges.columns)
@@ -433,9 +434,10 @@ class ConnectPoints:
         # for connection (to external poi): append new lines
         else:
             new_edges = gpd.GeoDataFrame(
-                    self.points[[self.key_col]], 
+                    self.points[[self.key_col]],
                     geometry=new_lines,
-                    columns=[self.key_col, 'geometry']
+                    columns=[self.key_col, 'geometry'],
+                    crs=edges.crs
                     )
             new_edges['oneway'] = False
             new_edges['highway'] = self.edge_highway

@@ -97,7 +97,7 @@ Written to `examples/output/` (gitignored):
 
 Once `isolines_parks.geojson` / `isochrones_parks.geojson` exist, there are two ways to look at them:
 
-1. **Built-in PNG rendering** — step 4 above (`geodecision visualize examples/config/visualize.json`) renders the isolines, colored by accessibility-distance category, to `examples/output/isochrones_map.png`. Like `fetch-polygons` and `compute-accessibility`, this command can take a while depending on the bounding box size.
+1. **Built-in PNG rendering** — step 4 above (`geodecision visualize examples/config/visualize.json`) renders the isolines, colored by accessibility-distance category, to `examples/output/isochrones_map.png`. `fetch-polygons` and `visualize` can take a while depending on the bounding box size; step 3, `compute-accessibility`, is the slowest — it took ~10 minutes on an average laptop for the Lyon example.
 2. **3D web visualization** — load the GeoJSON output into a visualization library such as [iTowns](https://www.itowns-project.org/). A live example built from this same kind of accessibility output is available [here](https://vcityteam.github.io/itowns-accessibility/), with its source code on [GitHub](https://github.com/VCityTeam/itowns-accessibility).
 
 ---

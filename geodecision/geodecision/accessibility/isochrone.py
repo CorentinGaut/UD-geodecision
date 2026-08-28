@@ -419,11 +419,9 @@ class Accessibility:
             gdf_buffered_lines_union = gpd.GeoDataFrame(geometry=[polys])
             gdf_buffered_lines_union[self.iso_cat_merged] = trip_time
             gdf_buffered_lines_union["color"] = self.colors[trip_time]
-            gdf_buffered_lines_union.crs = {
-                    'init': "epsg:{}".format(
-                            self.epsgs.metric
-                            )
-                    }
+            gdf_buffered_lines_union.crs = "EPSG:{}".format(
+                    self.epsgs.metric
+                    )
             gdf_union.append(gdf_buffered_lines_union)
             logger.info(
                 """
@@ -460,9 +458,7 @@ class Accessibility:
         """
         
         gdf.to_crs(
-                {
-                        'init': "epsg:{}".format(crs)
-                        }, 
+                "EPSG:{}".format(crs),
                 inplace=True
                 )
         

@@ -4,7 +4,7 @@
     "buildings_geojsonfile": "examples/output/buildings.geojson",
     "epsg_metric": 2154,
     "output_folder": "examples/output",
-    "output_png": "isochrones_map-v1-color_change.png",
+    "output_png": "isochrones_map.png",
     "title": "Walking distance to the nearest park",
     "linewidth": 0.5
 }
