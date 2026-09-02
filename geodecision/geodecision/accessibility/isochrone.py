@@ -12,6 +12,7 @@ from shapely import speedups
 from collections import namedtuple
 import time
 import pandas as pd
+from tqdm import tqdm
 
 from ..spatialops.operations import get_intersect_matches
 from ..logger.logger import _get_duration, logger
@@ -253,9 +254,12 @@ class Accessibility:
         self.l_gdf = []
         self.pb_nodes = []
 
-        for trip_time in self.trip_times:
-            for center_node in self.center_nodes:
-                self.get_subgraph(center_node, trip_time)
+        total = len(self.trip_times) * len(self.center_nodes)
+        with tqdm(total=total, desc="Computing isochrones") as pbar:
+            for trip_time in self.trip_times:
+                for center_node in self.center_nodes:
+                    self.get_subgraph(center_node, trip_time)
+                    pbar.update(1)
         gdf = gpd.pd.concat(self.l_gdf, sort=False)
         
         #Get the min values for "iso_cat" and update gdf with these min values

@@ -61,6 +61,7 @@ def main():
     args = parser.parse_args()
 
     run_fn = COMMANDS[args.command]
+    print(f"Running '{args.command}'...")
     run_fn(args.json_config)
 
     with open(args.json_config) as f:
