@@ -15,6 +15,7 @@ import sys
 from .accessibility.accessibility import run as compute_accessibility_run
 from .citygml.citygml import run as process_citygml_run
 from .graph.download import run as download_graph_run
+from .impact.impact_zone import run as compute_impact_zone_run
 from .osmquery.methods import run as fetch_polygons_run
 from .visualization.plot_isochrones import run as visualize_run
 
@@ -22,6 +23,7 @@ COMMANDS = {
         "download-graph": download_graph_run,
         "fetch-polygons": fetch_polygons_run,
         "compute-accessibility": compute_accessibility_run,
+        "compute-impact-zone": compute_impact_zone_run,
         "process-citygml": process_citygml_run,
         "visualize": visualize_run,
         }

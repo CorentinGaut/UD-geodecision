@@ -16,9 +16,14 @@ import geopandas as gpd
 import matplotlib.pyplot as plt
 from jsonschema import validate
 from matplotlib.lines import Line2D
+from matplotlib.patches import Patch
 
 from ..logger.logger import logger, _get_duration
+from ..impact.impact_zone import _read_zone
 from .schema import VIZ_SCHEMA
+
+_HIGHLIGHT_FILL = "#f5a623"
+_HIGHLIGHT_EDGE = "#8b3a00"
 
 
 def run(json_params):
@@ -54,6 +59,17 @@ def run(json_params):
             - output_png (str): output filename
             - title (str, optional)
             - linewidth (number, optional): isoline width, default 2.5
+            - zones_folder, zones_format, trip_times (optional): draw the
+              cumulative impact-zone extent (SpatialOperations.dict_unions
+              output from compute-accessibility, or compute-impact-zone's
+              own zones_folder/zones_format) as translucent bands, one per
+              trip time, colored to match the isolines' own trip-time
+              colors
+            - id_column, highlight_id (str, optional): highlight the single
+              feature in parks_geojsonfile matching
+              parks[id_column] == highlight_id (e.g. the park a
+              select_id-scoped compute-accessibility run was computed from).
+              "" (or the field being absent) means "no highlight"
     """
     start_process = time.time()
     with open(json_params) as f:
@@ -73,12 +89,44 @@ def run(json_params):
 
     fig, ax = plt.subplots(figsize=(12, 12))
 
+    # Colors keyed by trip-time category, taken directly from the isolines'
+    # own (Viridis) coloring - reused below for the impact-zone bands so
+    # both stay visually consistent with the isoline legend.
+    cat_color = {}
+    for cat in sorted(isolines["iso_cat_merged"].dropna().unique()):
+        cat_color[cat] = isolines.loc[isolines["iso_cat_merged"] == cat, "color"].iloc[0]
+
+    # Impact-zone extent: translucent bands, one per trip time, drawn
+    # largest/farthest first so nearer bands layer visibly on top - behind
+    # everything else (buildings, parks, isolines).
+    if params.get("zones_folder"):
+        zones_format = params.get("zones_format", "geojson")
+        for trip_time in sorted(params["trip_times"], reverse=True):
+            color = cat_color.get(float(trip_time))
+            if color is None:
+                continue
+            zone = _read_zone(params["zones_folder"], zones_format, trip_time)
+            zone = zone.to_crs(epsg_metric)
+            zone.plot(
+                    ax=ax, color=color, alpha=0.18,
+                    edgecolor=color, linewidth=1, zorder=0.4
+                    )
+
     if params.get("buildings_geojsonfile"):
         buildings = gpd.read_file(params["buildings_geojsonfile"]).to_crs(epsg_metric)
-        buildings.plot(ax=ax, color="#d9d9d9", edgecolor="none", zorder=1)
+        buildings.plot(ax=ax, color="black", edgecolor="none", zorder=1)
 
+    # "" (or the field being absent) means "no selection" - one config file
+    # toggles the single-park highlight rather than needing a separate one.
+    highlight_id = params.get("highlight_id") or None
+    id_column = params.get("id_column", "poly_id")
+    highlighted_park = None
     if params.get("parks_geojsonfile"):
         parks = gpd.read_file(params["parks_geojsonfile"]).to_crs(epsg_metric)
+        if highlight_id is not None:
+            is_highlighted = parks[id_column].astype(str) == str(highlight_id)
+            highlighted_park = parks.loc[is_highlighted]
+            parks = parks.loc[~is_highlighted]
         parks.plot(ax=ax, color="#1a7a3c", edgecolor="#0f4d24", linewidth=0.5, zorder=2)
 
     # Each street segment already carries its own accessibility color
@@ -86,13 +134,16 @@ def run(json_params):
     # re-derive/re-bin colors here.
     isolines.plot(ax=ax, color=isolines["color"], linewidth=linewidth, zorder=3)
 
+    # Drawn last/on top so the selected park is never hidden by isolines.
+    if highlighted_park is not None and not highlighted_park.empty:
+        highlighted_park.plot(
+                ax=ax, color=_HIGHLIGHT_FILL, edgecolor=_HIGHLIGHT_EDGE,
+                linewidth=2, zorder=4
+                )
+
     # Legend built from the distinct (iso_cat_merged, color) pairs actually
     # present in the data, so it always matches what's drawn regardless of
     # how many trip_times the isochrone computation used.
-    cat_color = {}
-    for cat in sorted(isolines["iso_cat_merged"].dropna().unique()):
-        cat_color[cat] = isolines.loc[isolines["iso_cat_merged"] == cat, "color"].iloc[0]
-
     legend_elements = []
     if 0.0 in cat_color:
         legend_elements.append(
@@ -104,6 +155,11 @@ def run(json_params):
             Line2D([0], [0], color=cat_color[cat], lw=3, label=f"{int(prev)}-{int(cat)} min")
         )
         prev = cat
+
+    if highlighted_park is not None and not highlighted_park.empty:
+        legend_elements.append(
+            Patch(facecolor=_HIGHLIGHT_FILL, edgecolor=_HIGHLIGHT_EDGE, label="Selected park")
+        )
 
     minx, miny, maxx, maxy = isolines.total_bounds
     pad = max(maxx - minx, maxy - miny) * 0.03

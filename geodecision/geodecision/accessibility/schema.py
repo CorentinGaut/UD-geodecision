@@ -54,6 +54,8 @@ ACCESS_SCHEMA = {
                     {"type" : "array"},
                 "id_column":
                     {"type" : "string"},
+                "select_id":
+                    {"type" : "string"},
                 "distance_buffer" : 
                     {"type" : "number"},
                 "lat" : 

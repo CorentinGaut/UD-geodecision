@@ -1,0 +1,9 @@
+{
+    "zones_folder": "examples/output",
+    "zones_format": "geojson",
+    "trip_times": [5, 10, 15],
+    "buildings_geojsonfile": "examples/output/buildings.geojson",
+    "epsg_metric": 2154,
+    "output_folder": "examples/output",
+    "output_format": "geojson"
+}

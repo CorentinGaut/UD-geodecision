@@ -190,6 +190,23 @@ def run(json_params):
     start = time.time()
     #Get polygons as GeoDataFrame
     gdf_features = gpd.read_file(params["polygons_geojsonfile"])
+    #Optionally scope the run to a single feature (e.g. one park) instead
+    # of pooling every feature in polygons_geojsonfile together.
+    # "" (or the field being absent) means "no selection" - one config file
+    # toggles between the two modes rather than needing a separate one.
+    select_id = params.get("select_id") or None
+    if select_id is not None:
+        gdf_features = gdf_features.loc[
+                gdf_features[params["id_column"]].astype(str) == str(select_id)
+                ]
+        if gdf_features.empty:
+            raise ValueError(
+                    "No feature with {!r} == {!r} in {!r}".format(
+                            params["id_column"],
+                            select_id,
+                            params["polygons_geojsonfile"]
+                            )
+                    )
     #Drop duplicates based on geometry
     gdf_features = gdf_features.drop_duplicates(subset="geometry")
     gdf_features = gdf_features.to_crs(

@@ -39,23 +39,26 @@ def gdf_to_geosource(gdf):
             )
         )
 
-def get_intersect_matches(base, possible_intersected):
+def get_intersect_matches(base, possible_intersected, geom_col="from"):
         """
         Description:
         ------------
-        
-        Get the geometries (possible_intersected) that intersect with the 
+
+        Get the geometries (possible_intersected) that intersect with the
         base geometry (base)
-        
+
         Parameters:
         -----------
-        
+
         - base(Shapely Polygon or MultiPolygon)
         - possible_intersected(GeoDataFrame)
+        - geom_col(str):
+            - name of the geometry column to test on possible_intersected
+            - default: "from" (isochrone.py's line-endpoint column)
         """
         #TODO: Check if intersection on "to" is necessary
         matches = []
-        possible_intersected = possible_intersected.set_geometry("from")
+        possible_intersected = possible_intersected.set_geometry(geom_col)
         sindex = possible_intersected.sindex
 
         # Shapely >=2.0 removed direct iteration on multi-part geometries;

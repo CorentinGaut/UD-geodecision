@@ -23,6 +23,16 @@ VIZ_SCHEMA = {
                     {"type": "string"},
                 "linewidth":
                     {"type": "number"},
+                "zones_folder":
+                    {"type": "string"},
+                "zones_format":
+                    {"type": "string"},
+                "trip_times":
+                    {"type": "array"},
+                "id_column":
+                    {"type": "string"},
+                "highlight_id":
+                    {"type": "string"},
                 },
         "required": [
                 "isolines_geojsonfile",

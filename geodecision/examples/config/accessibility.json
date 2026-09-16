@@ -21,6 +21,7 @@
     "prefix": "parks_demo",
     "columns_to_keep": ["poly_id", "name", "geometry"],
     "id_column": "poly_id",
+    "select_id": "way_128926551",
     "distance_buffer": 40,
     "lat": "y",
     "lon": "x",

@@ -6,5 +6,10 @@
     "output_folder": "examples/output",
     "output_png": "isochrones_map.png",
     "title": "Walking distance to the nearest park",
-    "linewidth": 0.5
+    "linewidth": 0.5,
+    "zones_folder": "examples/output",
+    "zones_format": "geojson",
+    "trip_times": [5, 10, 15],
+    "id_column": "poly_id",
+    "highlight_id": "way_128926551"
 }

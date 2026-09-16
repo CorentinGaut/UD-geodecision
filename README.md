@@ -52,11 +52,12 @@ geodecision fetch-polygons        examples/config/parks.json
 geodecision fetch-polygons        examples/config/buildings.json
 geodecision compute-accessibility examples/config/accessibility.json
 geodecision visualize             examples/config/visualize.json # optional: generate a png file to visualize the result
+geodecision compute-impact-zone   examples/config/impact_zone.json # optional: count buildings served per trip time
 ```
 > `fetch-polygons`, `compute-accessibility` and `visualize` can be long depending on the bounding box size — `compute-accessibility` took ~10 minutes on an average laptop for the Lyon example above
 
 This downloads a walkable street network and real park polygons for a bounding box in Lyon, computes isochrones (walking time to the nearest park), and renders a map to `geodecision/examples/output/isochrones_map.png`.
-Every parameter (bounding box, projection, trip times, ...) is set in the JSON config files under `examples/config/`, so re-running for a different area is a matter of editing JSON.
+Every parameter (bounding box, projection, trip times, ...) is set in the JSON config files under `examples/config/`, so re-running for a different area is a matter of editing JSON. To scope the isochrone to a single park instead of pooling all of them, set `select_id` in `accessibility.json` to that park's `poly_id` (leave it `""` for the default pooled behavior); `compute-impact-zone` then reports how many buildings fall in each trip-time zone. Set the matching `highlight_id` in `visualize.json` to render that park picked out on the map, with the impact-zone bands overlaid.
 
 Once the GeoJSON result is generated, there are two ways to visualize it:
 1. **Built-in PNG rendering** — the `visualize` step above renders the isolines/isochrones to a PNG map (`isochrones_map.png`).
