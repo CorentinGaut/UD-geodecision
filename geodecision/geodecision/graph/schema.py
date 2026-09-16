@@ -9,6 +9,8 @@ GRAPH_SCHEMA = {
         "properties": {
                 "bbox":
                     {"type": "array"},
+                "select_park":
+                    {"type": "object"},
                 "network_type":
                     {"type": "string"},
                 "epsg_origin":
@@ -23,7 +25,6 @@ GRAPH_SCHEMA = {
                     {"type": "string"},
                 },
         "required": [
-                "bbox",
                 "output_folder",
                 "edges_filename",
                 "nodes_filename",

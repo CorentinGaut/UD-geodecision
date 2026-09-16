@@ -13,6 +13,8 @@ POLYGON_QUERY_SCHEMA = {
         "properties": {
                 "bbox":
                     {"type": "array"},
+                "select_park":
+                    {"type": "object"},
                 "osm_key":
                     {"type": "string"},
                 "osm_value":
@@ -27,7 +29,6 @@ POLYGON_QUERY_SCHEMA = {
                     {"type": "string"},
                 },
         "required": [
-                "bbox",
                 "osm_key",
                 "output_folder",
                 "polygons_geojsonfile",

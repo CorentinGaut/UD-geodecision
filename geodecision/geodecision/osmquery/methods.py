@@ -19,6 +19,7 @@ from jsonschema import validate
 
 from ..graph.utils import islist
 from ..logger.logger import logger, _get_duration
+from ..spatialops.extent import resolve_bbox
 from .schema import POLYGON_QUERY_SCHEMA
 
 #def get_OSM_poly(
@@ -247,6 +248,9 @@ def run(json_params):
           osmquery.schema.POLYGON_QUERY_SCHEMA
         - Fields:
             - bbox (array): [SOUTH, WEST, NORTH, EAST] in EPSG:4326
+            - select_park (object, alternative to bbox): resolve the bbox
+              from a selected park's buffered impact zone instead of a
+              literal extent - see spatialops.extent.resolve_bbox
             - osm_key (str): OSM tag key, e.g. "leisure", "building"
             - osm_value (str): OSM tag value to filter on, default "all"
             - epsg_origin (number): output CRS, default 4326
@@ -273,7 +277,8 @@ def run(json_params):
     id_column = params.get("id_column", "poly_id")
 
     start = time.time()
-    gdf = get_OSM_poly(params["bbox"], params["osm_key"], value=osm_value)
+    bbox = resolve_bbox(params)
+    gdf = get_OSM_poly(bbox, params["osm_key"], value=osm_value)
     # get_OSM_poly returns a (element, id) multiindex from osmnx - flatten
     # it into a unique string id column, and drop geometry duplicates that
     # can occur when a feature matches more than one OSM element type.

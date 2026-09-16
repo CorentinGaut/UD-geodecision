@@ -16,6 +16,7 @@ import osmnx as ox
 from jsonschema import validate
 
 from ..logger.logger import logger, _get_duration
+from ..spatialops.extent import resolve_bbox
 from .schema import GRAPH_SCHEMA
 from .utils import graph_to_df, graph_with_time
 
@@ -42,6 +43,9 @@ def run(json_params):
         - Fields:
             - bbox (array): [SOUTH, WEST, NORTH, EAST] in EPSG:4326 (WGS84),
               same convention as osmquery.methods.get_OSM_poly
+            - select_park (object, alternative to bbox): resolve the bbox
+              from a selected park's buffered impact zone instead of a
+              literal extent - see spatialops.extent.resolve_bbox
             - network_type (str): osmnx network type, default "walk"
             - epsg_origin (number): CRS of the downloaded graph's node
               coordinates - always 4326 for osmnx, kept here so downstream
@@ -68,7 +72,7 @@ def run(json_params):
     # get_OSM_poly's bbox convention is (SOUTH, WEST, NORTH, EAST); osmnx
     # itself expects (west, south, east, north) - convert here so every
     # geodecision config uses the same bbox order.
-    south, west, north, east = params["bbox"]
+    south, west, north, east = resolve_bbox(params)
 
     start = time.time()
     G = ox.graph_from_bbox((west, south, east, north), network_type=network_type)
