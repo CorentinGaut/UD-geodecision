@@ -366,8 +366,13 @@ class ConnectPoints:
 
         # create gdf of new nodes
         elif ptype == 'access':
-            new_nodes = new_points[['geometry', self.key_col]]
-            new_nodes.columns = ['geometry', 'osmid']
+            # Keep every column from new_points (e.g. semantic tags like
+            # "entry_source"/"entry_tag") except ones that would collide
+            # with the constants set below.
+            reserved = {'geometry', self.key_col, 'access_type', 'highway', 'osmid'}
+            extra_cols = [c for c in new_points.columns if c not in reserved]
+            new_nodes = new_points[['geometry', self.key_col] + extra_cols].copy()
+            new_nodes = new_nodes.rename(columns={self.key_col: 'osmid'})
             new_nodes['access_type'] = self.access_type
             new_nodes['highway'] = self.node_highway_access
             new_nodes['osmid'] = new_nodes['osmid'].astype(str)

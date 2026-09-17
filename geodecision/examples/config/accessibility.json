@@ -14,6 +14,8 @@
     "trip_times": [5, 10, 15],
     "threshold": 60,
     "dist_split": 30,
+    "entrance_buffer_dist": 15,
+    "min_entries_per_park": 2,
     "knn": 5,
     "distance": 8000,
     "weight": "time",

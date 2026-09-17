@@ -51,7 +51,7 @@ geodecision compute-impact-zone   examples/config/impact_zone.json
 | 1 | `fetch-polygons` | `config/parks.json` | Fetches real park polygons (`osm_key`/`osm_value`) for `bbox` — a broad, one-time lookup to locate parks and their `poly_id`s; these are the isochrone origins |
 | 2 | `download-graph` | `config/graph.json` | Downloads a walkable OSM street graph, adds walking-time edge weights (`walk_speed_kmh`) — extent resolved from `select_park` (step 1's output, scoped to one park's buffered impact zone), or a literal `bbox` |
 | 2 | `fetch-polygons` | `config/buildings.json` | Fetches building footprints — used as map context, and as the input for step 5's impact zone; same `select_park`/`bbox` extent as step 2 |
-| 3 | `compute-accessibility` | `config/accessibility.json` | Splits each park's boundary into candidate entrance points, connects them to the street graph, and computes isochrones from all of them at once |
+| 3 | `compute-accessibility` | `config/accessibility.json` | Finds real OSM entrance/gate points near each park's boundary (falling back to evenly-spaced boundary points for parks with too few tagged ones), connects them to the street graph, and computes isochrones from all of them at once |
 | 4 | `visualize` | `config/visualize.json` | Renders the isolines (street segments), each colored by its own accessibility-distance category |
 | 5 | `compute-impact-zone` | `config/impact_zone.json` | Quantifies, per trip time, how many buildings (and how much footprint area) fall inside the accessible zone |
 

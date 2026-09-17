@@ -120,9 +120,55 @@ from .schema import POLYGON_QUERY_SCHEMA
 # Try to use osmnx instead
 # TODO: remove commented section above if not needed after changes
 
+def _fetch_osm_features(bbox, tags, geom_types):
+    """
+    Description
+    -----------
+    Fetch OSM elements matching `tags` in `bbox` via osmnx, keeping only
+    the requested geometry type(s).
+
+    Return
+    ------
+    GeoDataFrame (EPSG:4326), possibly with a (element, id) MultiIndex as
+    returned by osmnx - callers decide whether/how to reset/dedupe it.
+
+    Parameters
+    ----------
+    - bbox(tuple):
+        - bounding box for the query
+        - must be (SOUTH, WEST, NORTH, EAST)
+        - must be EPSG 4326 (WGS84) projection
+        - ex: (45.772, 4.864, 45.778, 4.875)
+    - tags(dict):
+        - tags dict for osmnx's `features_from_bbox`, e.g. {"leisure": "park"}
+          or {"entrance": True, "barrier": "gate"} (union/OR semantics)
+    - geom_types(list):
+        - shapely geom_type strings to keep, e.g. ["Polygon", "MultiPolygon"]
+          or ["Point"]
+    """
+
+    #Get GDF using osmnx (features_from_bbox replaces the removed
+    # ox.footprints.create_footprints_gdf; bbox order for osmnx is
+    # (west, south, east, north))
+    gdf = ox.features_from_bbox(
+            bbox=(bbox[1], bbox[0], bbox[3], bbox[2]),
+            tags=tags
+            )
+
+    #Keep only the requested geometry type(s)
+    gdf = gdf[gdf.geometry.geom_type.isin(geom_types)]
+
+    #Remove columns containing lists (to avoid Fiona writing crashes)
+    for col in gdf.columns:
+        if len(gdf) and isinstance(gdf[col].iloc[0], list):
+            gdf.drop(col, axis=1, inplace=True)
+
+    return gdf
+
+
 def get_OSM_poly(
-        bbox, 
-        key, 
+        bbox,
+        key,
         value="all"
         ):
     """
@@ -130,11 +176,11 @@ def get_OSM_poly(
     -----------
     Get OSM data with key/value pair and that is Polygon by making
     queries on Overpass
-    
+
     Return
     ------
     GeoDataFrame
-    
+
     Parameters
     ----------
     - bbox(tuple):
@@ -147,30 +193,40 @@ def get_OSM_poly(
     - value(str):
         - value for the OSM query
     """
-    
-    #Get GDF using osmnx (features_from_bbox replaces the removed
-    # ox.footprints.create_footprints_gdf; bbox order for osmnx is
-    # (west, south, east, north))
     tags = {key: True} if value == "all" else {key: value}
-    gdf = ox.features_from_bbox(
-            bbox=(bbox[1], bbox[0], bbox[3], bbox[2]),
-            tags=tags
-            )
-
-    #Keep only polygon geometries
-    gdf = gdf[gdf.geometry.geom_type.isin(["Polygon", "MultiPolygon"])]
+    gdf = _fetch_osm_features(bbox, tags, ["Polygon", "MultiPolygon"])
 
     #Filter if necessary
     if value != "all":
         gdf = gdf.loc[gdf[key] == value]
 
-    #Remove columns containing lists (to avoid Fiona writing crashes)
-    for col in gdf.columns:
-        if isinstance(gdf[col].iloc[0], list):
-            gdf.drop(col, axis=1, inplace=True)
-
     return gdf
-    
+
+
+def get_OSM_points(bbox, tags):
+    """
+    Description
+    -----------
+    Get OSM node/Point features matching `tags` in `bbox`. Used to fetch
+    real semantic entrance/gate points (e.g. tags={"entrance": True,
+    "barrier": "gate"}) instead of relying on purely geometric sampling.
+
+    Return
+    ------
+    GeoDataFrame (EPSG:4326), geometry=Point, raw OSM tag columns present
+    in the response (e.g. "entrance", "barrier").
+
+    Parameters
+    ----------
+    - bbox(tuple):
+        - bounding box for the query
+        - must be (SOUTH, WEST, NORTH, EAST)
+        - must be EPSG 4326 (WGS84) projection
+    - tags(dict):
+        - tags dict for osmnx's `features_from_bbox`, union/OR semantics
+    """
+    return _fetch_osm_features(bbox, tags, ["Point"])
+
 
 def _add_feature(features, feature):
     """

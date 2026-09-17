@@ -56,8 +56,12 @@ ACCESS_SCHEMA = {
                     {"type" : "string"},
                 "select_id":
                     {"type" : "string"},
-                "distance_buffer" : 
+                "distance_buffer" :
                     {"type" : "number"},
+                "entrance_buffer_dist":
+                    {"type" : "number"},
+                "min_entries_per_park":
+                    {"type" : "integer"},
                 "lat" : 
                     {"type" : "string"},
                 "lon" : 

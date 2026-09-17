@@ -26,8 +26,9 @@ from ..logger.logger import logger, _get_duration
 from .schema import ACCESS_SCHEMA
 from .isochrone import Accessibility
 from ..graph.utils import graph_to_gdf_points, df_to_graph, graph_to_df
-from ..graph.splittednodes import GetSplitNodes
+from ..graph.semanticentries import GetSemanticEntries
 from ..graph.connectpoints import ConnectPoints
+from ..osmquery.methods import get_OSM_points
 from ..spatialops.operations import SpatialOperations
 
 #speedups.enable()
@@ -225,18 +226,52 @@ def run(json_params):
                 )
     
     start = time.time()
-    #Split the LineStrings' polygons' boundaries into segments 
-    # (*with a set distance in meters*) in order to create new nodes to 
-    # generate potential connexions (*edges*) to the graph. 
-    polygons_points_metric = GetSplitNodes(
-            gdf_features, 
+    #Get real semantic entry points (OSM entrance=*/barrier=gate nodes)
+    # near each park's boundary, falling back to the geometric splitter
+    # (segments of a set distance in meters) for parks with too few real
+    # matches, so every park still gets entry nodes to connect to the
+    # graph (*edges*).
+    entrance_buffer_dist = params.get("entrance_buffer_dist", 15)
+    query_geom = gdf_features["geometry"].unary_union.buffer(entrance_buffer_dist)
+    minx, miny, maxx, maxy = gpd.GeoSeries(
+            [query_geom], crs=gdf_features.crs
+            ).to_crs(4326).total_bounds
+    bbox = (miny, minx, maxy, maxx)
+
+    try:
+        osm_points = get_OSM_points(
+                bbox, tags={"entrance": True, "barrier": "gate"}
+                )
+        # osmnx returns a (element, id) MultiIndex - flatten it into a
+        # readable, unique "osm_id" column (same pattern as
+        # osmquery.methods.run()'s id_column construction).
+        osm_points = osm_points.reset_index()
+        osm_points["osm_id"] = (
+                osm_points["element"].astype(str) + "_" + osm_points["id"].astype(str)
+                )
+        osm_points_metric = osm_points.to_crs(gdf_features.crs)
+    except Exception as e:
+        logger.info(
+                "Could not fetch OSM entrance/gate points, falling back "
+                "to fully synthetic entries: {}".format(e)
+                )
+        osm_points_metric = None
+
+    polygons_points_metric = GetSemanticEntries(
+            gdf_features,
+            osm_points_metric,
             params["dist_split"],
-            params["id_column"]
-            ).get_split_nodes()
-    
+            params["id_column"],
+            entrance_buffer_dist=entrance_buffer_dist,
+            min_entries_per_park=params.get("min_entries_per_park", 2)
+            ).get_entries()
+
     #Keep only desired columns
-    ## add "unique_id" to the list
-    params["columns_to_keep"].append("unique_id")
+    ## force-keep "unique_id" and the semantic entry columns, the same
+    ## way "unique_id" was already unconditionally kept
+    for col in ("unique_id", "entry_source", "entry_tag"):
+        if col not in params["columns_to_keep"]:
+            params["columns_to_keep"].append(col)
     polygons_points_metric = polygons_points_metric[params["columns_to_keep"]]
     
     logger.info(
