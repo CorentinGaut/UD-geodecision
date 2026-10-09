@@ -41,23 +41,23 @@ We use [uv](https://docs.astral.sh/uv/) - *a fast Python package and project man
 Two **independent** example workflows — they use different input data and neither depends on the other — live in [`geodecision/examples/`](geodecision/examples/README.md), both runnable entirely through the package's own CLI, so no example-only code is needed. Dependency versions are pinned in [`geodecision/pyproject.toml`](geodecision/pyproject.toml) and kept current (Python 3.11+).
 
 ##### Workflow 1: Accessibility to parks
-Walking accessibility to real OpenStreetMap park polygons, end to end:
+Walking accessibility to park polygons, end to end. By default these come from a local GeoJSON file ([`examples/input/parcs_300.geojson`](geodecision/examples/input/parcs_300.geojson), the Lyon metropole's parks):
 
 ```bash
 cd geodecision
 uv sync
 source .venv/bin/activate
 geodecision download-graph        examples/config/graph.json
-geodecision fetch-polygons        examples/config/parks.json
 geodecision fetch-polygons        examples/config/buildings.json
 geodecision compute-accessibility examples/config/accessibility.json
 geodecision visualize             examples/config/visualize.json # optional: generate a png file to visualize the result
 geodecision compute-impact-zone   examples/config/impact_zone.json # optional: count buildings served per trip time
 ```
-> `fetch-polygons`, `compute-accessibility` and `visualize` can be long depending on the bounding box size — `compute-accessibility` took ~10 minutes on an average laptop for the Lyon example above
+> `download-graph`, `fetch-polygons`, `compute-accessibility` and `visualize` can be long depending on the extent size. With the default configs, the extent is the whole local file (1,286 parks across the metropole), so `compute-accessibility` can take hours. For a quick try, set `select_id` to a single park, e.g. `"PAR-69386-06016"` (Parc de la Tête d'Or).
 
-This downloads a walkable street network and real park polygons for a bounding box in Lyon, computes isochrones (walking time to the nearest park), and renders a map to `geodecision/examples/output/isochrones_map.png`.
-Every parameter (bounding box, projection, trip times, ...) is set in the JSON config files under `examples/config/`, so re-running for a different area is a matter of editing JSON. To scope the isochrone to a single park instead of pooling all of them, set `select_id` in `accessibility.json` to that park's `poly_id` (leave it `""` for the default pooled behavior); `compute-impact-zone` then reports how many buildings fall in each trip-time zone. Set the matching `highlight_id` in `visualize.json` to render that park picked out on the map, with the impact-zone bands overlaid.
+This downloads a walkable street network covering the polygons file's extent (buffered by the walking distance), computes isochrones (walking time to the nearest park), and renders a map to `geodecision/examples/output/isochrones_map.png`.
+To use OpenStreetMap parks instead of the local file, run `geodecision fetch-polygons examples/config/parks.json` first and point `polygons_geojsonfile`/`parks_geojsonfile`/`id_column` at its output. See [the examples README](geodecision/examples/README.md#input-polygons-local-file-or-openstreetmap) for details.
+Every parameter (bounding box, projection, trip times, ...) is set in the JSON config files under `examples/config/`, so re-running for a different area is a matter of editing JSON. To scope the isochrone to a single park instead of pooling all of them, set `select_id` in `accessibility.json` (and `select_park.select_id` in `graph.json`/`buildings.json`) to that park's id, `uid` for the local file (leave it `""` for the default pooled behavior); `compute-impact-zone` then reports how many buildings fall in each trip-time zone. Set the matching `highlight_id` in `visualize.json` to render that park picked out on the map, with the impact-zone bands overlaid.
 
 Once the GeoJSON result is generated, there are two ways to visualize it:
 1. **Built-in PNG rendering** — the `visualize` step above renders the isolines/isochrones to a PNG map (`isochrones_map.png`).

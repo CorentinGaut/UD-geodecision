@@ -2,7 +2,7 @@
 
 Two independent example workflows, each runnable entirely through `geodecision`'s own CLI/config files — every parameter (bounding box, projection, thresholds, ...) lives in a JSON config under `config/`, so re-running for a different area is a matter of editing JSON, not code. They don't depend on each other and use different input data:
 
-1. **[Accessibility to parks](#workflow-1-accessibility-to-parks)** — real OpenStreetMap park polygons for a bbox in central Lyon, walking isochrones computed from every park at once ("time to the nearest park"), rendered as a map.
+1. **[Accessibility to parks](#workflow-1-accessibility-to-parks)** — park polygons from a local GeoJSON file (`input/parcs_300.geojson`, the Lyon metropole's parks) or fetched from OpenStreetMap, walking isochrones computed from every park at once ("time to the nearest park"), rendered as a map.
 2. **[CityGML roofs](#workflow-2-citygml-roofs)** — 3D building models (CityGML) parsed for per-building roof slope/area/compactness/floor-count, optionally filtered down to roofs with "potential" (e.g. for solar panels).
 
 ## Install
@@ -30,18 +30,39 @@ in whichever directory you ran the command from.
 ## Workflow 1: Accessibility to parks
 
 Requires internet access (`download-graph`, `fetch-polygons`, and
-`compute-accessibility` all query OpenStreetMap; fetching buildings for the
-whole bbox can take ~1 minute).
+`compute-accessibility` all query OpenStreetMap).
+
+### Input polygons: local file or OpenStreetMap
+
+The park polygons the isochrones start from can come from either source.
+Every command reads them through a plain file path, so switching is just
+a matter of editing that path in the configs:
+
+- **Local file (default)**: the example configs point at
+  [`input/parcs_300.geojson`](input/parcs_300.geojson), which holds the
+  Lyon metropole's parks (EPSG:2154, id column `uid`, name column `nom`).
+  Any polygon GeoJSON works, in any CRS: it is read with its own CRS and
+  reprojected to `epsg_metric`. You only need its id column to hold
+  unique values.
+- **OpenStreetMap**: run `fetch-polygons examples/config/parks.json`
+  first, then point the configs at its output
+  (`examples/output/parks.geojson`, id column `poly_id`, name column
+  `name`).
+
+The fields to edit when switching are:
+
+| config | fields |
+|---|---|
+| `accessibility.json` | `polygons_geojsonfile`, `id_column`, `columns_to_keep` |
+| `graph.json`, `buildings.json` | `select_park.parks_geojsonfile`, `select_park.id_column` |
+| `visualize.json` | `parks_geojsonfile`, `id_column` |
 
 ### Pipeline
 
-Each box below is a config file; each arrow is a `geodecision` command.
-Dotted arrows mean "this file's `select_park` can derive its query extent
-from that park", not a hard file dependency.
-
+With the local file (default configs):
 
 ```bash
-geodecision fetch-polygons        examples/config/parks.json
+geodecision fetch-polygons        examples/config/parks.json # if no local files
 geodecision download-graph        examples/config/graph.json
 geodecision fetch-polygons        examples/config/buildings.json
 geodecision compute-accessibility examples/config/accessibility.json
@@ -49,36 +70,69 @@ geodecision visualize             examples/config/visualize.json
 geodecision compute-impact-zone   examples/config/impact_zone.json
 ```
 
-`compute-accessibility` is the slowest step — it took ~10 minutes on an
-average laptop for the Lyon example. What it actually does: finds real OSM
+With OpenStreetMap parks, first run
+`geodecision fetch-polygons examples/config/parks.json` and repoint the
+configs as described above.
+
+> ⚠️ The default configs cover **the whole local file**: 1,286 parks
+> across the Lyon metropole (about 28 × 37 km). The graph and buildings
+> downloads are large, and `compute-accessibility` can take hours. For a
+> quick try, select a single park (see below), e.g.
+> `"select_id": "PAR-69386-06016"` (Parc de la Tête d'Or).
+
+What `compute-accessibility` actually does: it finds real OSM
 entrance/gate points near each park's boundary (falling back to
-evenly-spaced boundary points for parks with too few tagged ones), connects
-them to the street graph, and computes isochrones from all of them at once.
+evenly-spaced boundary points for parks with too few tagged ones),
+connects them to the street graph, and computes isochrones from all of
+them at once.
 
 ### Single park or whole extent
 
-Two ways to generate isochrones with the same commands — pick one by
-setting (or leaving empty) a `poly_id`:
+The same commands generate isochrones for either mode. Pick one by
+setting a park id or leaving it empty (`""`):
 
-- **Whole extent (default)** — `bbox` drives `graph.json`/`parks.json`/`buildings.json`,
-  and `select_id` is left empty (`""`) in `accessibility.json`/`visualize.json`.
-  `compute-accessibility` pools every park in the bbox together, measuring
-  "time to the *nearest* park" across all of them at once.
-- **Single selected park** — run `fetch-polygons` on `parks.json` once,
-  pick a `poly_id` from the resulting `parks.geojson`, and set it in
-  `select_id` (`accessibility.json`, `visualize.json`) and
-  `select_park.select_id` (`graph.json`, `buildings.json`). `compute-accessibility`
-  then computes the isochrone from that one park only; `select_park`
-  also derives `graph.json`/`buildings.json`'s query extent from that
-  park's own buffered impact zone (`max(trip_times)` at `walk_speed_kmh`,
-  or an explicit `buffer_m` — see `geodecision/geodecision/spatialops/extent.py`)
-  instead of a hand-picked `bbox`; `visualize.json`'s `highlight_id` picks
-  the park out on the map (orange fill/outline, "Selected park" in the
-  legend).
+- **Whole extent (default)**: `select_id` is `""` in
+  `accessibility.json`, in `visualize.json` (`highlight_id`) and in
+  `graph.json`/`buildings.json` (`select_park.select_id`).
+  `compute-accessibility` pools every park in the polygons file together,
+  measuring "time to the *nearest* park" across all of them. `select_park`
+  derives the graph and buildings query extent from the **whole file's**
+  extent, buffered by the impact-zone distance.
+- **Single selected park**: set a park id from the polygons file's
+  `id_column` in `select_id` (`accessibility.json`), `highlight_id`
+  (`visualize.json`) and `select_park.select_id` (`graph.json`,
+  `buildings.json`). `compute-accessibility` then computes the isochrone
+  from that one park only. `select_park` derives the query extent from
+  that park's own buffered impact zone, and `visualize.json`'s
+  `highlight_id` picks the park out on the map (orange fill/outline,
+  "Selected park" in the legend).
 
-Either way, `parks.json` itself always stays `bbox`-based (a broad,
-one-time lookup — there's no park to select until it's run once), which
-is why step 1 must run before step 2.
+In both modes the buffer is `max(trip_times)` at `walk_speed_kmh`, or an
+explicit `buffer_m` (see
+`geodecision/geodecision/spatialops/extent.py`). You can also set a
+literal `bbox` in `graph.json`/`buildings.json` instead of `select_park`.
+
+### Selecting parks by attributes
+
+`input/parcs_300.geojson` carries per-park attributes (`surface_parc` in
+m², `pct_vegetation` and `pct_canopee` in %). Set a `filters` block to keep
+only the parks matching thresholds (`min`/`max`, inclusive, each
+optional; any numeric column works):
+
+```json
+"filters": {
+    "surface_parc":   {"min": 5000},
+    "pct_vegetation": {"min": 50},
+    "pct_canopee":    {"min": 20}
+}
+```
+
+`{}` (the default) keeps every park. Put the **same** `filters` in
+`accessibility.json`, `visualize.json` and in `select_park` of
+`graph.json`/`buildings.json`, so the computed isochrones, the map and the
+OSM query extent all use the same parks. Filters combine with `select_id`
+(both must match). `compute-accessibility` writes the selected parks to
+`output/selected_parks.geojson` and logs how many were kept.
 
 ### Config cheat-sheet
 
@@ -111,8 +165,9 @@ wherever a library expects a different order (e.g. osmnx's own
 | `epsg_origin` | optional | `4326` |
 | `id_column` | optional | `"poly_id"` |
 
-`parks.json` stays `bbox`-based (there's no park to select yet);
-`buildings.json` uses `select_park` in the example config.
+`parks.json` stays `bbox`-based (there's no park to select yet) and is
+only needed for OSM-sourced parks. `buildings.json` uses `select_park` in
+the example config.
 </details>
 
 <details open>
@@ -133,6 +188,7 @@ All required — no code-level default.
 |---|---|---|
 | `trip_times`, `threshold`, `dist_split`, `knn`, `distance`, `distance_buffer`, `weight`, `tolerance` | required | — |
 | `select_id` | optional | none (whole extent) |
+| `filters` | optional | `{}` (all parks — see [Selecting parks by attributes](#selecting-parks-by-attributes)) |
 | `entrance_buffer_dist` | optional | `15` (meters — max distance from a park's boundary for a real OSM entrance/gate point to count) |
 | `min_entries_per_park` | optional | `2` (real matches needed to skip the synthetic fallback for that park) |
 
@@ -173,13 +229,13 @@ Points at `compute-accessibility`'s per-trip-time zone outputs
 `output_format`) and at `buildings.json`'s output.
 </details>
 
-To run this for a different city: edit `parks.json`'s `bbox`, and
-`epsg_metric` everywhere it appears (2154 = RGF93 / Lambert-93,
-France-specific — use a metric CRS appropriate for your area), including
-inside `graph.json`/`buildings.json`'s `select_park` blocks. Their
-`select_park.select_id` also needs updating to a real `poly_id` from the
-new area's `parks.geojson` — or set `bbox` directly in `graph.json`/
-`buildings.json` instead of `select_park` to use the whole-extent mode.
+To run this for a different city, point the configs at that city's
+polygons file (local, or `parks.json` with a new `bbox` for OSM). Then
+edit `epsg_metric` everywhere it appears, including inside
+`graph.json`/`buildings.json`'s `select_park` blocks (2154 = RGF93 /
+Lambert-93 is France-specific, so use a metric CRS appropriate for your
+area). If you're using single-park mode, also update every `select_id`
+to an id from the new file.
 
 ### Outputs
 
@@ -190,7 +246,7 @@ produces them:
 | file | content |
 |---|---|
 | `edges.json`, `nodes.json` | the graph, in geodecision's exchange format |
-| `parks.geojson`, `buildings.geojson` | real OSM polygons |
+| `parks.geojson`, `buildings.geojson` | real OSM polygons (`parks.geojson` only when parks are fetched from OSM) |
 | `isolines_parks.geojson` | every street segment reached, tagged with the time to the *nearest* park (`iso_cat_merged`) and its Viridis `color` |
 | `isochrones_parks.geojson` | one dissolved polygon per trip-time band |
 | `5.geojson`, `10.geojson`, `15.geojson` | cumulative accessible area per trip time, merged with the park footprints (`SpatialOperations`, keyed by trip time in minutes) |

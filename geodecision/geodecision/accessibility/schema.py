@@ -6,6 +6,8 @@ Created on Thu Jun 27 15:24:26 2019
 @author: thomas
 """
 
+from ..spatialops.selection import FILTERS_SCHEMA
+
 
 ACCESS_SCHEMA = {
         "type":"object",
@@ -56,6 +58,8 @@ ACCESS_SCHEMA = {
                     {"type" : "string"},
                 "select_id":
                     {"type" : "string"},
+                "filters":
+                    FILTERS_SCHEMA,
                 "distance_buffer" :
                     {"type" : "number"},
                 "entrance_buffer_dist":

@@ -4,6 +4,8 @@
 Schema for visualization.plot_isochrones.run() JSON parameters.
 """
 
+from ..spatialops.selection import FILTERS_SCHEMA
+
 VIZ_SCHEMA = {
         "type": "object",
         "properties": {
@@ -31,6 +33,8 @@ VIZ_SCHEMA = {
                     {"type": "array"},
                 "id_column":
                     {"type": "string"},
+                "filters":
+                    FILTERS_SCHEMA,
                 "highlight_id":
                     {"type": "string"},
                 },

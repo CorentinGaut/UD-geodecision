@@ -18,6 +18,7 @@ from jsonschema import validate
 #from shapely import speedups
 import json
 import geopandas as gpd
+import shapely
 import os
 import time
 import networkx as nx
@@ -27,6 +28,7 @@ from .schema import ACCESS_SCHEMA
 from .isochrone import Accessibility
 from ..graph.utils import graph_to_gdf_points, df_to_graph, graph_to_df
 from ..graph.semanticentries import GetSemanticEntries
+from ..spatialops.selection import select_features
 from ..graph.connectpoints import ConnectPoints
 from ..osmquery.methods import get_OSM_points
 from ..spatialops.operations import SpatialOperations
@@ -191,23 +193,29 @@ def run(json_params):
     start = time.time()
     #Get polygons as GeoDataFrame
     gdf_features = gpd.read_file(params["polygons_geojsonfile"])
-    #Optionally scope the run to a single feature (e.g. one park) instead
-    # of pooling every feature in polygons_geojsonfile together.
-    # "" (or the field being absent) means "no selection" - one config file
-    # toggles between the two modes rather than needing a separate one.
-    select_id = params.get("select_id") or None
-    if select_id is not None:
-        gdf_features = gdf_features.loc[
-                gdf_features[params["id_column"]].astype(str) == str(select_id)
-                ]
-        if gdf_features.empty:
-            raise ValueError(
-                    "No feature with {!r} == {!r} in {!r}".format(
-                            params["id_column"],
-                            select_id,
-                            params["polygons_geojsonfile"]
-                            )
-                    )
+    #Drop any Z coordinate (e.g. [x, y, 0.0] files): 3D entry points would
+    # otherwise be joined to the 2D graph's projected points in
+    # ConnectPoints, building mixed-dimension LineStrings that numpy rejects
+    # ("inhomogeneous shape").
+    gdf_features["geometry"] = shapely.force_2d(gdf_features.geometry.values)
+    #Optionally scope the run to a single feature (e.g. one park) and/or to
+    # the features matching attribute thresholds ("filters", e.g.
+    # surface_parc / pct_vegetation / pct_canopee) instead of pooling every
+    # feature in polygons_geojsonfile together.
+    # "" / {} (or the fields being absent) means "no selection" - one config
+    # file toggles between the modes rather than needing a separate one.
+    gdf_features = select_features(
+            gdf_features,
+            select_id=params.get("select_id"),
+            id_column=params.get("id_column"),
+            filters=params.get("filters"),
+            source=params["polygons_geojsonfile"],
+            )
+    #Export the selection so it can be inspected (e.g. in QGIS)
+    os.makedirs(output_folder, exist_ok=True)
+    selected_path = os.path.join(output_folder, "selected_parks.geojson")
+    gdf_features.to_file(selected_path, driver="GeoJSON")
+    logger.info("Selected features written to {}".format(selected_path))
     #Drop duplicates based on geometry
     gdf_features = gdf_features.drop_duplicates(subset="geometry")
     gdf_features = gdf_features.to_crs(

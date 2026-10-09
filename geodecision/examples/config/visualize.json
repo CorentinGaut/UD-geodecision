@@ -1,6 +1,6 @@
 {
     "isolines_geojsonfile": "examples/output/isolines_parks.geojson",
-    "parks_geojsonfile": "examples/output/parks.geojson",
+    "parks_geojsonfile": "examples/input/parcs_300.geojson",
     "buildings_geojsonfile": "examples/output/buildings.geojson",
     "epsg_metric": 2154,
     "output_folder": "examples/output",
@@ -10,6 +10,11 @@
     "zones_folder": "examples/output",
     "zones_format": "geojson",
     "trip_times": [5, 10, 15],
-    "id_column": "poly_id",
-    "highlight_id": "way_128926551"
+    "id_column": "uid",
+    "highlight_id": "",
+    "filters": {
+        "surface_parc":   {"min": 5000},
+        "pct_vegetation": {"min": 50},
+        "pct_canopee":    {"min": 40}
+    }
 }

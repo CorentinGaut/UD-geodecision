@@ -1,11 +1,16 @@
 {
     "select_park": {
-        "parks_geojsonfile": "examples/output/parks.geojson",
-        "id_column": "poly_id",
-        "select_id": "way_128926551",
+        "parks_geojsonfile": "examples/input/parcs_300.geojson",
+        "id_column": "uid",
+        "select_id": "",
         "epsg_metric": 2154,
         "trip_times": [5, 10, 15],
-        "walk_speed_kmh": 5
+        "walk_speed_kmh": 5,
+        "filters": {
+            "surface_parc":   {"min": 5000},
+            "pct_vegetation": {"min": 50},
+            "pct_canopee":    {"min": 20}
+        }
     },
     "network_type": "walk",
     "epsg_origin": 4326,

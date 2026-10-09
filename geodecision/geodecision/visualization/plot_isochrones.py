@@ -20,6 +20,7 @@ from matplotlib.patches import Patch
 
 from ..logger.logger import logger, _get_duration
 from ..impact.impact_zone import _read_zone
+from ..spatialops.selection import select_features
 from .schema import VIZ_SCHEMA
 
 _HIGHLIGHT_FILL = "#f5a623"
@@ -70,6 +71,8 @@ def run(json_params):
               parks[id_column] == highlight_id (e.g. the park a
               select_id-scoped compute-accessibility run was computed from).
               "" (or the field being absent) means "no highlight"
+            - filters (dict, optional): only draw parks matching these
+              attribute thresholds - see spatialops.selection.select_features
     """
     start_process = time.time()
     with open(json_params) as f:
@@ -123,6 +126,11 @@ def run(json_params):
     highlighted_park = None
     if params.get("parks_geojsonfile"):
         parks = gpd.read_file(params["parks_geojsonfile"]).to_crs(epsg_metric)
+        # Draw only the parks compute-accessibility was run from.
+        parks = select_features(
+                parks, filters=params.get("filters"),
+                source=params["parks_geojsonfile"]
+                )
         if highlight_id is not None:
             is_highlighted = parks[id_column].astype(str) == str(highlight_id)
             highlighted_park = parks.loc[is_highlighted]

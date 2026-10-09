@@ -1,9 +1,9 @@
 {
-    "polygons_geojsonfile": "examples/output/parks.geojson",
+    "polygons_geojsonfile": "examples/input/parcs_300.geojson",
     "graph_nodes_jsonfile": "examples/output/nodes.json",
     "graph_edges_jsonfile": "examples/output/edges.json",
     "epsg_graph": 4326,
-    "epsg_input": 4326,
+    "epsg_input": 2154,
     "epsg_metric": 2154,
     "output_features_layername": "parks",
     "output_isolines_layername": "isolines_parks",
@@ -21,11 +21,16 @@
     "weight": "time",
     "access_type": "park",
     "prefix": "parks_demo",
-    "columns_to_keep": ["poly_id", "name", "geometry"],
-    "id_column": "poly_id",
-    "select_id": "way_128926551",
+    "columns_to_keep": ["uid", "nom", "geometry"],
+    "id_column": "uid",
+    "select_id": "",
     "distance_buffer": 40,
     "lat": "y",
     "lon": "x",
-    "tolerance": 0
+    "tolerance": 0,
+    "filters": {
+        "surface_parc":   {"min": 5000},
+        "pct_vegetation": {"min": 50},
+        "pct_canopee":    {"min": 40}
+    }
 }
